@@ -79,7 +79,7 @@ Finish Iteration Report
 1. **Peer Evaluation**:
 Our team will conduct peer evaluation as part of this project. Discuss group
 norms for handling peer evaluations and state them here.
-### F. Changes to contract:
+**Changes to contract:**
 You cannot change any aspect of the team contract, particularly the "Procedures"
 section, once the signed contract has been turned in to me. Therefore, be VERY
 SPECIFIC on the Procedures section and spend some time thinking about this section.
