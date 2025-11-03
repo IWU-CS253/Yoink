@@ -48,29 +48,41 @@ Because of the frequency of check-ins, not everyone will have "accomplished" som
 
 Show up to meetings punctually; communicate with the group if you are unable to in advance when possible
 Fulfill assigned tasks by their deadlines; if there are problems, communicate with group via check-ins and just reaching out
-Be available to contact when possible. Check discord channel at least once a day.
+Be available to contact when possible. Check group chat at least once a day.
 Dealing with Group Members Not Meeting Obligations
 
 Each team member is entitled to one iteration's worth of grace. If there is trouble, it is expected that they communicate with the leader or the group as a whole via check-ins and direct communication.
 During a consecutive week of someone not completing their share (or if the rest of the group agrees there is a problem that needs addressing), the next meeting (or in emergency meeting if necessary) the group should discuss if they feel the circumstances justify the lack of contribution
 If it is determined that there is a genuine problem with the team member's lack of contribution, they will be spoken to by the group and given a "warning"
-If the problem persists, the leader will reach out to Prof. Liffiton to try and find a solution
-If someone stops communicating (no check-ins, does not respond to discord / email, and does not come to class) for 3+ days, it will be brought to Prof. Liffiton.
-If they stop communicating for 1-2 days, we will have a team meeting to address the problem before we have to pass it on to Mark.
-Meetings & Communication
+If the problem persists, the leader will reach out to Prof. Sheese to try and find a solution
+If someone stops communicating (no check-ins, does not respond to discord / email, and does not come to class) for 3+ days, it will be brought to Prof. Sheese.
+If they stop communicating for 1-2 days, we will have a team meeting to address the problem before we have to pass it on to Sheese.
 
-Communication
+_**Meetings & Communication**_
 
-Primary method of communication is the group discord
-Meeting Times
+**Communication**
 
-Tuesdays 6:30-7:30 at Tommy's or CNS
+Primary method of communication is the group chat
+
+**Meeting Times**
+
+Tuesdays 8pm to 9pm at Dugout(Pillsbury room)
 Reflect on previous iteration
 Discuss plans for next iteration
 Any other issues
-Thursdays 6:30-7:30 in CNS (Room TBD)
+Saturdays 3pm to 4 pm at Dugout(Pillsbury room)
 Brief (5-10 minutes) verbal check-in / discussion
-Work time
-Sundays 8:00-Finished Report on Discord
-Resolve any lingering troubles with week work
 Finish Iteration Report
+
+**Consequences of breach of contract:**
+
+1. **Peer Evaluation**:
+Our team will conduct peer evaluation as part of this project. Discuss group
+norms for handling peer evaluations and state them here.
+### F. Changes to contract:
+You cannot change any aspect of the team contract, particularly the "Procedures"
+section, once the signed contract has been turned in to me. Therefore, be VERY
+SPECIFIC on the Procedures section and spend some time thinking about this section.
+The only way I will accept a change to your Team Contract is if ALL members of your
+team sign and date a written amendment to your initial agreement.
+
