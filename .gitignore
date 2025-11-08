@@ -1,0 +1,9 @@
+# Virtual Environment
+venv
+
+# Environment Variables
+.env
+
+# Ignore ALL pycache files across the repo
+# https://stackoverflow.com/questions/56309100/how-to-ignore-the-same-name-directory-pycache-in-a-project
+**/__pycache__/
