@@ -8,9 +8,4 @@ venv
 # https://stackoverflow.com/questions/56309100/how-to-ignore-the-same-name-directory-pycache-in-a-project
 **/__pycache__/
 
-<<<<<<< Updated upstream
-=======
-
-
->>>>>>> Stashed changes
 .idea/
