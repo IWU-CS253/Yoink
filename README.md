@@ -20,12 +20,12 @@ Point of contact for the team and for Prof. Sheese
 
 **Rotation:**
 
-11/03/25-11/09/25: Yohance
-11/10/25-11/16/25: Chris
-11/17/25-11/23/25: Hirat
-11/24/25-11/30/25: Thanks Giving Break
-12/01/25-12/07/25: Earl
-12/08/25-12/14/25: Yohance
+11/03/25-11/09/25: Yohance;
+11/10/25-11/16/25: Chris;
+11/17/25-11/23/25: Hirat;
+11/24/25-11/30/25: Thanks Giving Break;
+12/01/25-12/07/25: Earl;
+12/08/25-12/14/25: Yohance;
 
 **Decision-Making**
 
