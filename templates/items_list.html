@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin: 0;">Latest posts</h2>
+        {% if session.get('user_id') %}
+            <a class="btn primary" href="{{ url_for('create_item') }}">+ Post an item</a>
+        {% endif %}
+    </div>
+
+{% for it in items %}
+    <article class="card" style="display: flex; gap: 1rem;">
+        {% if it.image_path %}
+            <img src="{{ url_for('static', filename=it.image_path) }}" alt="{{ it.title }}" style="width:120px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #ddd;">
+        {% endif %}
+        <div style="flex:1;">
+            <h3 style="margin:.2rem 0;">
+                <a href="{{ url_for('item_detail', item_id=it.id) }}">{{ it.title }}</a>
+            </h3>
+            <p style="margin:.2rem 0; color:#555;">{{ it.description[:160] }}{% if it.description|length > 160 %}…{% endif %}</p>
+            <p style="margin:.2rem 0; color:#777; font-size:.9rem;">
+            {% if it.category %}#{{ it.category }} · {% endif %}
+            {% if it.condition %}Condition: {{ it.condition }} · {% endif %}
+            Posted by {{ it.username }} · {{ it.created_at }}
+            </p>
+        </div>
+    </article>
+{% else %}
+    <div class="card">No items yet. Be the first to <a href="{{ url_for('create_item') }}">post</a>!</div>
+  {% endfor %}
+{% endblock %}

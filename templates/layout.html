@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Yoink</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-css-reset/dist/reset.min.css">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            font-family: Arial, sans-serif, "Times New Roman";
+            margin: 0;
+            background: #f7f7f9;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header, footer {
+            background: #0b6;
+            color: #fff;
+            padding: 0.75rem 1rem;
+        }
+        main {
+            max-width: 880px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+            flex: 1;
+            width: 100%;
+        }
+        footer {
+            margin-top: auto;
+        }
+        nav a { color:#fff; margin-right: 1rem; text-decoration: none; }
+        .card { background:#fff; border:1px solid #e5e5e5; border-radius:12px; padding:1rem; margin-bottom:1rem; }
+        .btn { display:inline-block; padding:.5rem .75rem; border-radius:8px; text-decoration:none; border:1px solid #0b6; color:#0b6; background:#fff; }
+        .btn.primary { background:#0b6; color:#fff; border-color:#0b6; }
+        .flash { padding:.5rem .75rem; border-radius:8px; margin:.5rem 0; }
+        .flash.info { background:#e8f4ff; }
+        .flash.success { background:#e6fbe9; }
+        .flash.warning { background:#fff8e1; }
+        .flash.danger { background:#ffe8e8; }
+        form .row { display:flex; gap:1rem; }
+        form .row > * { flex:1; }
+        label { display:block; font-weight:600; margin-top: .5rem; }
+        input[type=text], input[type=email], input[type=password], textarea, select {
+        width:100%; padding:.5rem .6rem; border-radius:8px; border:1px solid #ccc; background:#fff; box-sizing: border-box;
+        }
+        textarea { min-height: 120px; }
+    </style>
+</head>
+<body>
+<header>
+    <nav>
+        <a href="{{ url_for('list_items') }}">Home</a>
+        {%  if session.get('user_id') %}
+            <a href="{{ url_for('create_item') }}">Post Item</a>
+            <form action="{{ url_for('logout') }}" method="post" style="display: inline">
+                <button class="btn" style="margin-left: 1rem">Log out ({{ session['username'] }})</button>
+            </form>
+        {% else %}
+            <a href="{{ url_for('login') }}">Log in</a>
+            <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+    </nav>
+</header>
+
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block body %}
+    {% if content %}<div class="card">{{ content|safe }}</div>{% endif %}
+  {% endblock %}
+</main>
+
+<footer>
+  <small>&copy; {{ 2025 }} Yoink</small>
+</footer>
+
+</body>
+</html>
