@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block body %}
+  <article class="card">
+    <h2 style="margin-top:0;">{{ item.title }}</h2>
+    {% if item.image_path %}
+      <img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.title }}" style="width:100%; max-height:420px; object-fit:cover; border-radius:10px; border:1px solid #ddd; margin:.5rem 0 1rem;">
+    {% endif %}
+    <p>{{ item.description }}</p>
+
+    <p style="color:#555">
+      {% if item.category %}<strong>Category:</strong> {{ item.category }} · {% endif %}
+      {% if item.condition %}<strong>Condition:</strong> {{ item.condition }} · {% endif %}
+      {% if item.location %}<strong>Pickup:</strong> {{ item.location }} · {% endif %}
+      <strong>Status:</strong> {{ item.status }}
+    </p>
+
+    <p style="color:#333;"><strong>Contact:</strong> {{ item.contact }}</p>
+    <p style="color:#777; font-size:.9rem;">Posted by {{ item.username }} on {{ item.created_at }}</p>
+  </article>
+{% endblock %}
