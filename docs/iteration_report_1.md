@@ -2,7 +2,7 @@
 
 Team: Team Yoink
 Iteration Dates: Nov 7th, 2025 - Nov 14th, 2025 
-Plan Date: Nov 7th, 2025
+Report Date: Nov 12th, 2025
 
 ## First-week Iteration
 **Team Members**
@@ -14,10 +14,10 @@ Plan Date: Nov 7th, 2025
 ***Iteration Goal***
 Create the infrustructure of the web app by setting up login/logout, the databbase and some basic functionality like posting and being able to modifying the posts.
 
-Planned Tasks
-1. Setting up the DB (Earl)
+Work Completed 
+1. Set up the DB (Earl)
 
-    - Create a database where all items have a name, status,
+    - Created a database where all items have a name, status,
     image url, location, description, and creation timestamp
         - Name: name of item
         - Status: current status of the item
@@ -27,13 +27,16 @@ Planned Tasks
 
     - POST/ item: post an item to platform
     - GET/ item: getting an item a user is intrested 
+    - There was a bug were github had a hard time using the db already made.
+      So we just deleted the db, then init the database again to fix it.
+    Completetion time: 5 hours
 
 2. Authenication (Yohance)
 Tasks:
 
     - Implement basic authentication
     - Design and implement log in/out, and sign up functionalities.
-        - Create core endpoints:
+        - Created core endpoints:
             GET /login - Log in or sign up page
                 - User can either log in, or sign up. 
             GET /verify-user - verify the given username and password is valid
@@ -42,12 +45,13 @@ Tasks:
                 - Clear cookies and other related browser-stored user data
             POST /create-account - Create a new user instance in the DB
                 - This entails hashing the password for security reasons
-        - Estimated Hours: 2 hours
+        - Completetion time: 8 hours
 
 3. UI Guidelines (Chris)
-    - Implement how the UI will look for the posted items
-    - Each item should have an delete and edit button
-    Estimated Hours: 20 hours
+    - Made Guidlines for how the UI and Login page should look like
+    - Created images for the buttons. Specifically the bell, magnifying glass, and inbox
+    - Created a basic html file for the main_page of the server. Still not finished with the complete layout
+    Estimated Hours: 10 hours
 
 4. Post Items (Hirat)
 Tasks:
@@ -60,30 +64,28 @@ Tasks:
             POST /create-item
                 - Creates a new item record in the database
                 - Image is posted as a url, which is obtained from Cloudinary.
-        - Estimated Hours: 2 hours
+        - Estimated Hours: 10 hours
 
-**Tentative after this point**
+Key Metrics:
 
-## Second Week Iteration
-- Tasks: Integrate all CRUD operations mentioned in user_stories.md, ensure cross-functionality with Cloudinary
-- If time allows, work on user's configuration page.
+Metric       Value
+Total hours worked 33 hours
+Tasks planned 4
+Tasks completed 3.5
+Complete rate 85%
+Bugs 1(resolved)
 
-## Third Week Iteration
-- Tasks: Integrate the live chat, as well as other tasks revolving around this feature such as
-blocking users, pinning conversations, deleting conversations, etc.
-- If time allows, work on Notifications
+Challenges:
+Integration delays: due to some issues with the database
 
-# Key Metrics
-Total estimated hours- 20 hours
-Total Tasks Planned- 4
-Team Capacity- 40 hours (10 hours/person)
-Buffer Time- 20 hours
+Next steps:
+Chris: Will work on the search feature for the webpage
+Hirat: will work on the modifying the post.
+Yohance: will work on checking to see if the user is from IWU, and to hash the password.
+Earl: Will work on seeing other users profiles
 
-**Risks**
--   Issues while setting up database could delay integration but the whole team will try to have it solved by this weekend meetup.
--   Additional features might extend the work plan a little beyond the capacity.
-
-**Success Criteria**
--   Web app is functional, in terms of being able to login and out.
--   App is able to display posted items and change/modify the posts.
--   At least 85% of the task is done by Nov 11, 2025.
+Team Feedback:
+Chris: Contribute more code
+Hirat: make sure to communicate with the team before going off to do other parts of the project
+Yohance: good job helping with the database fixing that bug
+Earl: nice on getting the database started
