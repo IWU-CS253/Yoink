@@ -197,3 +197,7 @@ def create_item():
         return redirect(url_for("list_items"))
 
     return render_template("items_new.html", username=session.get("username"))
+
+@app.route("/user_profile ")
+def user_profile():
+    return(render_template("user_profile.html"))

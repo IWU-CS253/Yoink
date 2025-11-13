@@ -20,7 +20,7 @@
             <p style="margin:.2rem 0; color:#777; font-size:.9rem;">
             {% if it.category %}#{{ it.category }} · {% endif %}
             {% if it.condition %}Condition: {{ it.condition }} · {% endif %}
-            Posted by {{ it.username }} · {{ it.created_at }}
+                Posted by <a href="{{  url_for('user_profile') }}">{{ it.username }}</a> · {{ it.created_at }}
             </p>
         </div>
     </article>
