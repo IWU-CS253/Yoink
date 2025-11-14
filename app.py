@@ -198,6 +198,18 @@ def create_item():
 
     return render_template("items_new.html", username=session.get("username"))
 
+@app.route("/user_profile ", methods=["GET", "POST"])
+def user_profile():
+    user = request.form["profile_username"]
+
+    db = get_db()
+    rows = db.execute("""
+                      SELECT *
+                      FROM items
+                        JOIN users ON users.id = items.owner_id
+                      ORDER BY created_at DESC, id DESC LIMIT 100
+                      """).fetchall()
+    return(render_template("user_profile.html", user_name=user))
 @app.route("/my-items", methods=["GET"])
 def my_items():
 
@@ -209,3 +221,5 @@ def my_items():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
