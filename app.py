@@ -1,7 +1,6 @@
 import os
 import sqlite3
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
-from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)  # creates the flask app object
 
@@ -58,11 +57,9 @@ def register():
             return render_template("register.html")
         db = get_db()
         try:
-            hashed_password = generate_password_hash(password)
-            print("pushing hashed password: ", hashed_password, " for: ", password)
             db.execute(
                 "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                (username, email, hashed_password),
+                (username, email, password),
             )
             db.commit()
             flash("Registered! You can log in now.", "success")
@@ -79,20 +76,14 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
-
         db = get_db()
-
         row = db.execute("SELECT id, username, password FROM users WHERE username = ?", (username,)).fetchone()
-        hashed_pw = dict(row)['password']
-
-        if row and check_password_hash(hashed_pw, password):
+        if row and row["password"] == password:
             session["user_id"] = row["id"]
             session["username"] = row["username"]
             flash(f"Welcome, {row['username']}", "success")
             return redirect(request.args.get("next") or url_for("list_items"))
-        
         flash("Invalid username or password.", "danger")
-        
     return render_template("login.html") if os.path.exists(
         os.path.join(BASE_DIR, "templates", "login.html")
     ) else render_template("layout.html", content="(Add login.html Use /register to create a user.")
@@ -207,6 +198,18 @@ def create_item():
 
     return render_template("items_new.html", username=session.get("username"))
 
+@app.route("/user_profile ", methods=["GET", "POST"])
+def user_profile():
+    user = request.form["profile_username"]
+
+    db = get_db()
+    rows = db.execute("""
+                      SELECT *
+                      FROM items
+                        JOIN users ON users.id = items.owner_id
+                      ORDER BY created_at DESC, id DESC LIMIT 100
+                      """).fetchall()
+    return(render_template("user_profile.html", user_name=user))
 @app.route("/my-items", methods=["GET"])
 def my_items():
 
@@ -218,3 +221,5 @@ def my_items():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+

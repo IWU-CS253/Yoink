@@ -15,6 +15,6 @@
     </p>
 
     <p style="color:#333;"><strong>Contact:</strong> {{ item.contact }}</p>
-    <p style="color:#777; font-size:.9rem;">Posted by {{ item.username }} on {{ item.created_at }}</p>
+      <p style="color:#777; font-size:.9rem;">Posted by <a href="{{ url_for('user_profile') }}">{{ item.username }}</a> on {{ item.created_at }}</p>
   </article>
 {% endblock %}
