@@ -198,6 +198,7 @@ def create_item():
 
     return render_template("items_new.html", username=session.get("username"))
 
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 @app.route("/user_profile ")
 def user_profile():
@@ -217,3 +218,17 @@ def my_items():
 if __name__ == "__main__":
     app.run(debug=True)
 >>>>>>> c5ecefcfdf1a1cf026a107ec59502a1f66439670
+=======
+@app.route("/user_profile ", methods=["GET", "POST"])
+def user_profile():
+    user = request.form["profile_username"]
+
+    db = get_db()
+    rows = db.execute("""
+                      SELECT *
+                      FROM items
+                        JOIN users ON users.id = items.owner_id
+                      ORDER BY created_at DESC, id DESC LIMIT 100
+                      """).fetchall()
+    return(render_template("user_profile.html", user_name=user))
+>>>>>>> Stashed changes

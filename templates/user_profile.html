@@ -2,7 +2,36 @@
 
 
 {%  block body %}
+    <style>
+    .user_photo{
+        height: 120px;
+        width: 120px;
+        border-radius: 50%;
 
+    }
+
+    .card-title{
+
+
+
+    }
+    .card-body {
+        flex-direction: column;
+    }
+</style>
+    <div class="card" style="width: 18rem;">
+
+        <div class="card-body">
+            <h5 class="card-title">@{{ user_name }}</h5>
+            <img class="user_photo" src="https://picsum.photos/200/300">
+
+
+
+        </div>
+
+
+    </div>
+{{ user_name }}
 
 
 

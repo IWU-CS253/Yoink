@@ -20,7 +20,7 @@
             <p style="margin:.2rem 0; color:#777; font-size:.9rem;">
             {% if it.category %}#{{ it.category }} · {% endif %}
             {% if it.condition %}Condition: {{ it.condition }} · {% endif %}
-                Posted by <a href="{{  url_for('user_profile') }}">{{ it.username }}</a> · {{ it.created_at }}
+                Posted by <form method="post" action="{{ url_for('user_profile') }}"><input type="hidden" name="profile_username" value="{{ it.username }}"><button style="background: none; border: none; padding: 0;" type="submit">{{ it.username }}</button></form>· {{ it.created_at }}
             </p>
         </div>
     </article>
