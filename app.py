@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)  # creates the flask app object
 
@@ -57,9 +58,11 @@ def register():
             return render_template("register.html")
         db = get_db()
         try:
+            hashed_password = generate_password_hash(password)
+            print("pushing hashed password: ", hashed_password, " for: ", password)
             db.execute(
                 "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                (username, email, password),
+                (username, email, hashed_password),
             )
             db.commit()
             flash("Registered! You can log in now.", "success")
@@ -78,7 +81,8 @@ def login():
         password = request.form.get("password", "").strip()
         db = get_db()
         row = db.execute("SELECT id, username, password FROM users WHERE username = ?", (username,)).fetchone()
-        if row and row["password"] == password:
+        hashed_pw = dict(row)['password']
+        if row and check_password_hash(hashed_pw, password):
             session["user_id"] = row["id"]
             session["username"] = row["username"]
             flash(f"Welcome, {row['username']}", "success")
