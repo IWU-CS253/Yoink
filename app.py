@@ -7,18 +7,19 @@ app = Flask(__name__)  # creates the flask app object
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # gets the absolute path to the folder
 
 app.config.update(
-    SECRET_KEY=os.environ.get("SECRET_KEY", "dev-secret-change-me"),
+    SECRET_KEY=os.environ.get("SECRET_KEY", "dev-secret-change-me"),  # signs sessions
     DATABASE=os.path.join(BASE_DIR, "database.db"),  # absolute filesystem path to the SQLite database file
     UPLOAD_FOLDER=os.path.join(BASE_DIR, "static", "uploads"),  # path where uploaded files will be saved
-    MAX_CONTENT_LENGTH=2 * 1024 * 1024,  # limiting the size of the uploading file
-    ALLOWED_EXTENSIONS={"png", "jpg", "jpeg", "gif", "webp"},  # allowed img extensions
+    MAX_CONTENT_LENGTH=2 * 1024 * 1024,  # limiting the size of the uploading file (2mb)
+    ALLOWED_EXTENSIONS={"png", "jpg", "jpeg", "gif", "webp"},  # allowed img extensions (need to add heic file as mostly people use iphone)
 )
 
+# checks the existence of the upload directory
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 
 def get_db():
-    if "db" not in g:
+    if "db" not in g: # one connection per request
         rv = sqlite3.connect(app.config["DATABASE"])
         rv.row_factory = sqlite3.Row
         g.db = rv
@@ -32,6 +33,7 @@ def close_db(error):
         db.close()  # closes the sqlite connection
 
 
+# initializes the DB from schema
 def init_db():
     db = get_db()
     with open(os.path.join(BASE_DIR, "schema.sql"), "r", encoding="utf-8") as f:
@@ -49,22 +51,23 @@ def init_db_command():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        email = request.form.get("email", "").strip()
+        username = request.form.get("username", "").strip()  # fetches the fields and returns "" if missing
+        email = request.form.get("email", "").strip()  # strip removes any whitespace
         password = request.form.get("password", "").strip()
         if not username or not email or not password:
             flash("Username, email, and password are required.", "danger")
             return render_template("register.html")
-        db = get_db()
+        db = get_db()  # get database connection
         try:
+            # insert the new user into the DB
             db.execute(
                 "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
                 (username, email, password),
             )
-            db.commit()
+            db.commit()  # makes the changes permanent
             flash("Registered! You can log in now.", "success")
             return redirect(url_for("login"))
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError:  # shows error when there's a duplicate value
             flash("Username or email already exists.", "danger")
     return render_template("register.html") if os.path.exists(
         os.path.join(BASE_DIR, "templates", "register.html")
@@ -93,9 +96,10 @@ def login():
 def logout():
     session.clear()
     flash("Logged out.", "info")
-    return redirect(url_for("list_items"))
+    return redirect(url_for("list_items"))  # only shows the listed items on the app
 
 
+# checks that the filename has an extension at the end
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
 
