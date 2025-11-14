@@ -205,8 +205,6 @@ def my_items():
 
     items = db.execute("SELECT * FROM items WHERE items.owner_id = ?", [session["user_id"]]).fetchall()
 
-    print(list(map(dict, items)))
-
     return render_template("my_items.html", items=items)
 
 if __name__ == "__main__":
