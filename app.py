@@ -197,3 +197,17 @@ def create_item():
         return redirect(url_for("list_items"))
 
     return render_template("items_new.html", username=session.get("username"))
+
+@app.route("/my-items", methods=["GET"])
+def my_items():
+
+    db = get_db()
+
+    items = db.execute("SELECT * FROM items WHERE items.owner_id = ?", [session["user_id"]]).fetchall()
+
+    print(list(map(dict, items)))
+
+    return render_template("my_items.html", items=items)
+
+if __name__ == "__main__":
+    app.run(debug=True)
