@@ -79,15 +79,20 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
+
         db = get_db()
+
         row = db.execute("SELECT id, username, password FROM users WHERE username = ?", (username,)).fetchone()
         hashed_pw = dict(row)['password']
+
         if row and check_password_hash(hashed_pw, password):
             session["user_id"] = row["id"]
             session["username"] = row["username"]
             flash(f"Welcome, {row['username']}", "success")
             return redirect(request.args.get("next") or url_for("list_items"))
+        
         flash("Invalid username or password.", "danger")
+        
     return render_template("login.html") if os.path.exists(
         os.path.join(BASE_DIR, "templates", "login.html")
     ) else render_template("layout.html", content="(Add login.html Use /register to create a user.")
