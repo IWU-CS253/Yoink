@@ -52,8 +52,7 @@
          </p>
          <p style="margin: 0.2rem 0; color: #777; font-size: 0.9rem">
             {% if it.category %}#{{ it.category }} · {% endif %} {% if
-            it.condition %}Condition: {{ it.condition }} · {% endif %} Posted by
-            {{ it.username }} · {{ it.created_at }}
+            it.condition %}Condition: {{ it.condition }} · {% endif %}{{ it.created_at }}
          </p>
       </div>
    </article>

@@ -15,7 +15,7 @@ app.config.update(
 )
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
+app.config["BLOCKED_USERS"] = []
 
 def get_db():
     if "db" not in g:
@@ -126,6 +126,7 @@ def index():
 @app.get("/items")
 def list_items():
     db = get_db()
+
     rows = db.execute("""
     SELECT items.*, users.username
     FROM items
@@ -200,6 +201,7 @@ def create_item():
 
 @app.route("/user_profile ", methods=["POST", "GET"])
 def user_profile():
+    """"""
     user_name = request.form["profile_username"]
 
     db = get_db()
