@@ -58,6 +58,7 @@
         <a href="{{ url_for('list_items') }}">Home</a>
         {%  if session.get('user_id') %}
             <a href="{{ url_for('create_item') }}">Post Item</a>
+            <a href="{{ url_for('my_items') }}">My items</a>
             <form action="{{ url_for('logout') }}" method="post" style="display: inline">
                 <button class="btn" style="margin-left: 1rem">Log out ({{ session['username'] }})</button>
             </form>

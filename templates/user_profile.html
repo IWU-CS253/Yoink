@@ -1,45 +1,65 @@
 {% extends "layout.html" %}
-
-
 {%  block body %}
-    <style>
-    .user_photo{
-        height: 120px;
-        width: 120px;
-        border-radius: 50%;
-
-    }
-
-    .card-title{
-
-
-
-    }
-    .card-body {
-        flex-direction: column;
-    }
+<style>
+   .user_photo{
+   height: 120px;
+   width: 120px;
+   border-radius: 50%;
+   }
+   .container{
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   }
+   .btn-danger{
+   background-color: red;
+   color: white;
+   border-color: white;
+   }
 </style>
-    <div class="card" style="width: 18rem;">
-
-        <div class="card-body">
-            <h5 class="card-title">@{{ user_name }}</h5>
-            <img class="user_photo" src="https://picsum.photos/200/300">
-
-
-
-        </div>
-
-
-    </div>
-{{ user_name }}
-
-
-
-
-
+<div class="container">
+   <img class="user_photo" src="https://picsum.photos/200/300">
+   <h5 class="card-title">     @{{ user_name }}</h5>
+   <button type="button" class="btn btn-danger">Block @{{ user_name }}</button>
+</div>
+{% for it in items %}
+<ol>
+   <article class="card" style="display: flex; gap: 1rem">
+      {% if it.image_path %}
+      <img
+         src="{{ url_for('static', filename=it.image_path) }}"
+         alt="{{ it.title }}"
+         style="
+         width: 120px;
+         height: 120px;
+         object-fit: cover;
+         border-radius: 8px;
+         border: 1px solid #ddd;
+         "
+         />
+      {% endif %}
+      <div>
+      <div style="flex: 1">
+         <h3 style="margin: 0.2rem 0">
+            <a href="{{ url_for('item_detail', item_id=it.id) }}"
+               >{{ it.title }}</a
+               >
+         </h3>
+         <p style="margin: 0.2rem 0; color: #555">
+            {{ it.description[:160] }}{% if it.description|length > 160 %}…{%
+            endif %}
+         </p>
+         <p style="margin: 0.2rem 0; color: #777; font-size: 0.9rem">
+            {% if it.category %}#{{ it.category }} · {% endif %} {% if
+            it.condition %}Condition: {{ it.condition }} · {% endif %} Posted by
+            {{ it.username }} · {{ it.created_at }}
+         </p>
+      </div>
+   </article>
+</ol>
+{% endfor %}
 {% endblock %}
-
-
 
 
 
