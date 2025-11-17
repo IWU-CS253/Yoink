@@ -1,7 +1,6 @@
 import os
 import sqlite3
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
-from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)  # creates the flask app object
 
@@ -12,7 +11,7 @@ app.config.update(
     DATABASE=os.path.join(BASE_DIR, "database.db"),  # absolute filesystem path to the SQLite database file
     UPLOAD_FOLDER=os.path.join(BASE_DIR, "static", "uploads"),  # path where uploaded files will be saved
     MAX_CONTENT_LENGTH=2 * 1024 * 1024,  # limiting the size of the uploading file (2mb)
-    ALLOWED_EXTENSIONS={"png", "jpg", "jpeg", "gif", "webp"},  # allowed img extensions (need to add heic file as mostly people use iphone)
+    ALLOWED_EXTENSIONS={"png", "jpg", "jpeg", "gif", "webp", "heic"},  # allowed img extensions (need to add heic file as mostly people use iphone)
 )
 
 # checks the existence of the upload directory
@@ -60,11 +59,9 @@ def register():
             return render_template("register.html")
         db = get_db()  # get database connection
         try:
-            hashed_password = generate_password_hash(password)
-            print("pushing hashed password: ", hashed_password, " for: ", password)
             db.execute(
                 "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                (username, email, hashed_password),
+                (username, email, password),
             )
             db.commit()  # makes the changes permanent
             flash("Registered! You can log in now.", "success")
@@ -81,20 +78,14 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
-
         db = get_db()
-
         row = db.execute("SELECT id, username, password FROM users WHERE username = ?", (username,)).fetchone()
-        hashed_pw = dict(row)['password']
-
-        if row and check_password_hash(hashed_pw, password):
+        if row and row["password"] == password:
             session["user_id"] = row["id"]
             session["username"] = row["username"]
             flash(f"Welcome, {row['username']}", "success")
             return redirect(request.args.get("next") or url_for("list_items"))
-        
         flash("Invalid username or password.", "danger")
-        
     return render_template("login.html") if os.path.exists(
         os.path.join(BASE_DIR, "templates", "login.html")
     ) else render_template("layout.html", content="(Add login.html Use /register to create a user.")
@@ -209,6 +200,18 @@ def create_item():
         return redirect(url_for("list_items"))
 
     return render_template("items_new.html", username=session.get("username"))
+
+
+@app.route("/items/<int:item_id>/delete", methods=['POST'])
+def delete_item(item_id: int):
+    db = get_db()
+    item = db.execute("SELECT * FROM items WHERE id = ?", (item_id,)).fetchone()
+
+    db.execute("DELETE FROM items WHERE id = ?", (item_id,))
+    db.commit()
+
+    flash("Item deleted successfully.", "success")
+    return redirect(url_for("my_items"))
 
 @app.route("/user_profile ", methods=["GET", "POST"])
 def user_profile():
