@@ -15,6 +15,6 @@
     </p>
 
     <p style="color:#333;"><strong>Contact:</strong> {{ item.contact }}</p>
-      <p style="color:#777; font-size:.9rem;">Posted by <a href="{{ url_for('user_profile') }}">{{ item.username }}</a> on {{ item.created_at }}</p>
+      <p style="color:#777; font-size:.9rem;">Posted by <form method="post" action="{{ url_for('user_profile') }}"><input type="hidden" name="profile_username" value="{{ item.username }}"><button style="background: none; border: none; padding: 0;" type="submit">{{ item.username }}</button></form> on {{ item.created_at }}</p>
   </article>
 {% endblock %}

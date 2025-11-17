@@ -16,7 +16,7 @@ app.config.update(
 )
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
+app.config["BLOCKED_USERS"] = []
 
 def get_db():
     if "db" not in g:
@@ -135,6 +135,7 @@ def index():
 @app.get("/items")
 def list_items():
     db = get_db()
+
     rows = db.execute("""
     SELECT items.*, users.username
     FROM items
@@ -207,18 +208,16 @@ def create_item():
 
     return render_template("items_new.html", username=session.get("username"))
 
-@app.route("/user_profile ", methods=["GET", "POST"])
+@app.route("/user_profile ", methods=["POST", "GET"])
 def user_profile():
-    user = request.form["profile_username"]
+    """"""
+    user_name = request.form["profile_username"]
 
     db = get_db()
-    rows = db.execute("""
-                      SELECT *
-                      FROM items
-                        JOIN users ON users.id = items.owner_id
-                      ORDER BY created_at DESC, id DESC LIMIT 100
-                      """).fetchall()
-    return(render_template("user_profile.html", user_name=user))
+    user_id = db.execute("SELECT id FROM users WHERE username = ?", [user_name]).fetchall()
+    items = db.execute(" SELECT * FROM items  where owner_id = ?", [user_id[0][0]]).fetchall()
+
+    return(render_template("user_profile.html", user_name=user_name, items=items))
 @app.route("/my-items", methods=["GET"])
 def my_items():
 
