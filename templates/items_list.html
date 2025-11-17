@@ -2,6 +2,12 @@
 {% block body %}
     <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
         <h2 style="margin: 0;">Latest posts</h2>
+        <search>
+            <form action="{{ url_for('search')}}" method="post">
+            <input type="search" name="title" value="{{ items.title }}">
+            <button type="submit">Search</button>
+            </form>
+        </search>
         {% if session.get('user_id') %}
             <a class="btn primary" href="{{ url_for('create_item') }}">+ Post an item</a>
         {% endif %}

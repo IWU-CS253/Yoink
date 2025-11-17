@@ -219,6 +219,17 @@ def my_items():
 
     return render_template("my_items.html", items=items)
 
+@app.route("/search", methods=["POST"])
+def search():
+    db = get_db()
+
+    if request.form['title'] == '':
+        sorted_items = db.execute('SELECT * FROM items ORDER BY created_at DESC')
+    else:
+        sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?)', [request.form['title']]).fetchall()
+
+    return render_template("items_list.html", items=sorted_items)
+
 if __name__ == "__main__":
     app.run(debug=True)
 
