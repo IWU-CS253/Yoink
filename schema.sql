@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     password TEXT,
+    blocked_user_ids TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
