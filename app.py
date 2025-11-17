@@ -226,7 +226,7 @@ def search():
     if request.form['title'] == '':
         sorted_items = db.execute('SELECT * FROM items ORDER BY created_at DESC')
     else:
-        sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?)', [request.form['title']]).fetchall()
+        sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY created_at DESC', [request.form['title']]).fetchall()
 
     return render_template("items_list.html", items=sorted_items)
 
