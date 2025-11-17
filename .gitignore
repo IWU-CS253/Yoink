@@ -10,4 +10,4 @@ venv
 
 .idea/
 
-.database.db/
+*.db
