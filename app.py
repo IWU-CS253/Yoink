@@ -202,6 +202,58 @@ def create_item():
     return render_template("items_new.html", username=session.get("username"))
 
 
+@app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
+def edit_item(item_id: int):
+    db = get_db()
+    item = db.execute("SELECT * FROM items WHERE id = ?", (item_id, )).fetchone()
+
+    if not item:
+        flash("Item not found.", "warning")
+        return redirect(url_for("my_items"))
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+        category = request.form.get("category", "").strip()
+        condition = request.form.get("condition", "").strip()
+        location = request.form.get("location", "").strip()
+        contact = request.form.get("contact", "").strip()
+        image = request.files.get("image")
+
+        errors = []
+        if not title:
+            errors.append("Title is required.")
+        if not description:
+            errors.append("Description is required.")
+        if not contact:
+            errors.append("Contact is required.")
+
+        image_path = item["image_path"]
+        try:
+            if image and image.filename:
+                image_path = save_image(image)
+        except ValueError as e:
+            errors.append(str(e))
+
+        if errors:
+            for e in errors:
+                flash(e, "danger")
+                return render_template("items_edit.html", item=item, form=request.form)
+
+        db.execute("""
+        UPDATE items 
+        SET title = ?, description = ?, category = ?, condition = ?, location = ?, 
+        contact = ?, image_path = ?
+        WHERE id = ?
+        """, (title, description, category, condition, location, contact, image_path, item_id))
+        db.commit()
+
+        flash("Item updated!", "success")
+        return redirect(url_for("my_items"))
+
+    return render_template("items_edit.html", item=item)
+
+
 @app.route("/items/<int:item_id>/delete", methods=['POST'])
 def delete_item(item_id: int):
     db = get_db()
@@ -212,6 +264,7 @@ def delete_item(item_id: int):
 
     flash("Item deleted successfully.", "success")
     return redirect(url_for("my_items"))
+
 
 @app.route("/user_profile ", methods=["GET", "POST"])
 def user_profile():
