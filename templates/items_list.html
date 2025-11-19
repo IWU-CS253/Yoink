@@ -1,7 +1,20 @@
 {% extends "layout.html" %}
+
 {% block body %}
+    <style>
+    input::placeholder{
+        color: #00bb66;
+        opacity: 4;
+    }
+</style>
     <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
         <h2 style="margin: 0;">Latest posts</h2>
+        <div>
+            <form action="{{ url_for('search')}}" method="post">
+            <input style="height: .75 rem; border-radius:8px; width: 50%; box-sizing: border-box; border:1px solid #0b6; color:#0b6;"type="text" placeholder="Item..." name="title" value="{{ items.title }}">
+            <button  type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
         {% if session.get('user_id') %}
             <a class="btn primary" href="{{ url_for('create_item') }}">+ Post an item</a>
         {% endif %}
