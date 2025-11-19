@@ -128,6 +128,7 @@ def index():
 
 @app.get("/items")
 def list_items():
+    """Lists all the items in the database"""
     db = get_db()
 
     rows = db.execute("""
@@ -142,6 +143,7 @@ def list_items():
 
 @app.get("/items/<int:item_id>")
 def item_detail(item_id: int):
+    """Returns the item details from database"""
     db = get_db()
     row = db.execute("""
     SELECT items.*, users.username, users.email
@@ -157,10 +159,14 @@ def item_detail(item_id: int):
 
 @app.route("/items/new", methods=["GET", "POST"])
 def create_item():
+    """Adds a post to the website"""
+
+    # asks the user log in, in order to be able to post
     if "user_id" not in session:
         flash("Please log in to post an item.", "warning")
         return redirect(url_for("login", next=request.url))
-
+    
+    # takes away the whitespace, and adds all the information to the database
     if request.method == "POST":
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
@@ -170,6 +176,7 @@ def create_item():
         contact = request.form.get("contact", "").strip()
         image = request.files.get("image")
 
+        # checks to make sure the user puts in the required data
         errors = []
         if not title:
             errors.append("Title is required.")
@@ -179,12 +186,14 @@ def create_item():
             errors.append("Contact is required.")
 
         image_path = None
+        # uploads the image, if image was provided
         try:
             if image and image.filename:
                 image_path = save_image(image)
         except ValueError as e:
             errors.append(str(e))
 
+        # if there are any errors, it'll flash red what the error is to the user
         if errors:
             for e in errors: flash(e, "danger")
             return render_template("items_new.html",
@@ -197,6 +206,7 @@ def create_item():
         """, (session["user_id"], title, description, category, condition, location, contact, image_path))
         db.commit()
 
+        # if no errors, the post will be added to the items_list page
         flash("Item posted!", "success")
         return redirect(url_for("list_items"))
 
@@ -205,13 +215,16 @@ def create_item():
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
 def edit_item(item_id: int):
+    """Allows the user to only edit in their own posts"""
     db = get_db()
     item = db.execute("SELECT * FROM items WHERE id = ?", (item_id, )).fetchone()
 
+    # returns error if the item isn't found
     if not item:
         flash("Item not found.", "warning")
         return redirect(url_for("my_items"))
 
+    # takes the information from the database
     if request.method == "POST":
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
@@ -221,6 +234,7 @@ def edit_item(item_id: int):
         contact = request.form.get("contact", "").strip()
         image = request.files.get("image")
 
+        # checks to make sure the user puts in the required data
         errors = []
         if not title:
             errors.append("Title is required.")
@@ -229,6 +243,7 @@ def edit_item(item_id: int):
         if not contact:
             errors.append("Contact is required.")
 
+        # uploads the image, if image was provided
         image_path = item["image_path"]
         try:
             if image and image.filename:
@@ -236,11 +251,13 @@ def edit_item(item_id: int):
         except ValueError as e:
             errors.append(str(e))
 
+        # if there are any errors, it'll flash red what the error is to the user
         if errors:
             for e in errors:
                 flash(e, "danger")
                 return render_template("items_edit.html", item=item, form=request.form)
 
+        # updates the database with the edited information
         db.execute("""
         UPDATE items 
         SET title = ?, description = ?, category = ?, condition = ?, location = ?, 
@@ -249,6 +266,7 @@ def edit_item(item_id: int):
         """, (title, description, category, condition, location, contact, image_path, item_id))
         db.commit()
 
+        # lets the user know it was updated
         flash("Item updated!", "success")
         return redirect(url_for("my_items"))
 
@@ -257,9 +275,12 @@ def edit_item(item_id: int):
 
 @app.route("/items/<int:item_id>/delete", methods=['POST'])
 def delete_item(item_id: int):
+    """Takes the id of the post, then deletes that post"""
     db = get_db()
+    # Looks for the item they want to delete
     item = db.execute("SELECT * FROM items WHERE id = ?", (item_id,)).fetchone()
 
+    # deletes that item
     db.execute("DELETE FROM items WHERE id = ?", (item_id,))
     db.commit()
 
@@ -277,9 +298,10 @@ def user_profile():
     items = db.execute(" SELECT * FROM items  where owner_id = ?", [user_id[0][0]]).fetchall()
 
     return(render_template("user_profile.html", user_name=user_name, items=items))
+
 @app.route("/my-items", methods=["GET"])
 def my_items():
-
+    """Shows the users only their post"""
     db = get_db()
 
     items = db.execute("SELECT * FROM items WHERE items.owner_id = ?", [session["user_id"]]).fetchall()
@@ -288,11 +310,14 @@ def my_items():
 
 @app.route("/search", methods=["POST"])
 def search():
+    """Searches for specific items"""
     db = get_db()
 
+    # base case: where the user wants to go back to every post
     if request.form['title'] == '':
         sorted_items = db.execute('SELECT * FROM items ORDER BY created_at DESC')
     else:
+        # if not empty, it will show the item based on the characters they use for the search
         sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY created_at DESC', [request.form['title']]).fetchall()
 
     return render_template("items_list.html", items=sorted_items)

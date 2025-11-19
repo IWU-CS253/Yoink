@@ -7,21 +7,27 @@
         opacity: 4;
     }
 </style>
+    <!--The main page-->
     <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
         <h2 style="margin: 0;">Latest posts</h2>
+        <!--The search bar-->
         <div>
             <form action="{{ url_for('search')}}" method="post">
             <input style="height: .75 rem; border-radius:8px; width: 50%; box-sizing: border-box; border:1px solid #0b6; color:#0b6;"type="text" placeholder="Item..." name="title" value="{{ items.title }}">
             <button  type="submit" class="btn btn-primary">Search</button>
             </form>
         </div>
+        <!--Post button-->
         {% if session.get('user_id') %}
             <a class="btn primary" href="{{ url_for('create_item') }}">+ Post an item</a>
         {% endif %}
     </div>
+
+<!--Shows all the posts currently in the databse-->
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-    {% for it in items %}
+{% for it in items %}
     <article class="card" style="display: flex; flex-direction: column; height: 100%; padding: 0; overflow: hidden; ">
+
         {% if it.image_path %}
             <img src="{{ url_for('static', filename=it.image_path) }}" alt="{{ it.title }}"
                  style="width:100%; height:250px; object-fit:cover;">
