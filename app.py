@@ -269,7 +269,7 @@ def delete_item(item_id: int):
 
 @app.route("/user_profile ", methods=["GET", "POST"])
 def user_profile():
-    """"""
+    """Displays a users profile so users can interact with one another"""
     user_name = request.form["profile_username"]
 
     db = get_db()
@@ -285,6 +285,38 @@ def my_items():
     items = db.execute("SELECT * FROM items WHERE items.owner_id = ?", [session["user_id"]]).fetchall()
 
     return render_template("my_items.html", items=items)
+
+@app.route("/search", methods=["POST"])
+def search():
+    db = get_db()
+
+    if request.form['title'] == '':
+        sorted_items = db.execute('SELECT * FROM items ORDER BY created_at DESC')
+    else:
+        sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY created_at DESC', [request.form['title']]).fetchall()
+
+    return render_template("items_list.html", items=sorted_items)
+@app.route("/blocked_users", )
+def blocked_users():
+
+    """  STILL WORKING ON THE BLOCK FEATURE
+    db = get_db()
+    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
+    current_user_id=session["user_id"]
+    blocked_user = request.args["blocked_user"]
+
+
+    if current_blocked_users == None:
+        db.execute("update users set blocked_user_ids = ? where user_id=?", [blocked_user, session["user_id"]])
+        db.commit()
+        return redirect(url_for('list_items'))
+
+    user_id = db.execute("SELECT id FROM users WHERE username = ?", [blocked_user]).fetchall()[0][0]
+    BLOCKED_USERS[user_id] = blocked_user
+
+    """
+
+    return redirect(url_for('list_items'))
 
 if __name__ == "__main__":
     app.run(debug=True)
