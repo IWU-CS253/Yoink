@@ -10,7 +10,7 @@ app.config.update(
     SECRET_KEY=os.environ.get("SECRET_KEY", "dev-secret-change-me"),  # signs sessions
     DATABASE=os.path.join(BASE_DIR, "database.db"),  # absolute filesystem path to the SQLite database file
     UPLOAD_FOLDER=os.path.join(BASE_DIR, "static", "uploads"),  # path where uploaded files will be saved
-    MAX_CONTENT_LENGTH=2 * 1024 * 1024,  # limiting the size of the uploading file (2mb)
+    MAX_CONTENT_LENGTH=7 * 1024 * 1024,  # limiting the size of the uploading file (7mb)
     ALLOWED_EXTENSIONS={"png", "jpg", "jpeg", "gif", "webp", "heic"},  # allowed img extensions (need to add heic file as mostly people use iphone)
 )
 

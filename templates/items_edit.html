@@ -3,7 +3,7 @@
     <!--The edit page-->
     <div class="card">
         <h2 style="margin-top: 0; ">Edit</h2>
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <label for="title">Title *</label>
             <input type="text" id="title" name="title" value="{{ (form.title if form else item.title) }}" required>
 
@@ -46,7 +46,7 @@
                 </div>
             {% endif %}
 
-            <label for="image">Upload new image (optional, pnd/jpg/jpeg/gif/webp/heic, <- 2MB)</label>
+            <label for="image">Upload new image (optional, png/jpg/jpeg/gif/webp/heic, <- 2MB)</label>
             <input type="file" id="image" name="image" accept=".png, .jpg, .jpeg, .gif, .webp, .heic">
 
             <div style="margin-top: 1rem">
