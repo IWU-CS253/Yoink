@@ -312,13 +312,14 @@ def my_items():
 def search():
     """Searches for specific items"""
     db = get_db()
+    search_term = f"%{request.form["title"]}%"
 
     # base case: where the user wants to go back to every post
     if request.form['title'] == '':
         sorted_items = db.execute('SELECT * FROM items ORDER BY created_at DESC')
     else:
         # if not empty, it will show the item based on the characters they use for the search
-        sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY created_at DESC', [request.form['title']]).fetchall()
+        sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY created_at DESC', [search_term]).fetchall()
 
     return render_template("items_list.html", items=sorted_items)
 @app.route("/blocked_users", )
