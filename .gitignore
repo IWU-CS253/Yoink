@@ -4,6 +4,7 @@ venv
 
 # Environment Variables
 .env
+.DS_Store
 
 # Ignore ALL pycache files across the repo
 # https://stackoverflow.com/questions/56309100/how-to-ignore-the-same-name-directory-pycache-in-a-project
