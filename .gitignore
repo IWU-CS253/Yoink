@@ -1,5 +1,6 @@
 # Virtual Environment
 venv
+.venv/
 
 # Environment Variables
 .env
@@ -10,6 +11,5 @@ venv
 
 .idea/
 
-
 database.db
-
+*.sqlite
