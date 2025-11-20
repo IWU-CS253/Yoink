@@ -1,8 +1,13 @@
 import os
 import sqlite3
+import yagmail
+import random
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
+from dotenv import load_dotenv
 
 app = Flask(__name__)  # creates the flask app object
+
+load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # gets the absolute path to the folder
 
@@ -17,6 +22,9 @@ app.config.update(
 # checks the existence of the upload directory
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 app.config["BLOCKED_USERS"] = []
+
+# Client for sending emails
+yag = yagmail.SMTP(os.environ.get("EMAIL_USERNAME", ""), os.environ.get("EMAIL_PASSWORD", ""))
 
 def get_db():
     if "db" not in g: # one connection per request
@@ -47,6 +55,51 @@ def init_db_command():
     init_db()
     print("Initialized the database.")
 
+@app.route('/send-otp', methods=["POST"])
+def send_otp():
+    print("form: ", request.form)
+    username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "").strip()
+    otp = request.form.get("otp", "").strip()
+
+    # Someone could get the right otp code, but create an account with a non @iwu.edu domain, by hitting the 
+    # endpoint directly
+    if not str(email).endswith("@iwu.edu"):
+        flash("Only IWU students allowed.", 'danger')
+        return render_template("register.html")
+
+    db = get_db()  # get database connection
+
+    otp_match = db.execute("SELECT * FROM otp WHERE email = ? AND code = ?", [email, otp]).fetchone()
+
+    if otp_match is None:
+        flash("Wrong OTP code.", "danger")
+        return render_template("otp_registration.html", email=email, username=username, password=password)
+    
+    otp_match_dict = dict(otp_match)
+    
+    # Technically not needed, but nice to have.
+    if not otp in otp_match_dict.values():
+        flash("Wrong OTP code.")
+        return render_template("otp_registration.html", email=email, username=username, password=password)
+
+    # Could technically use id, but email and code works fine too.
+    db.execute("DELETE FROM otp WHERE email = ? AND code = ?", [email, otp])
+    db.commit()
+
+    # Only if all checks go through, register the user
+    try:
+        db.execute(
+            "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+            (username, email, password),
+        )
+        db.commit()  # makes the changes permanent
+        flash("Registered! You can log in now.", "success")
+        return redirect(url_for("login"))
+    except sqlite3.IntegrityError:  # shows error when there's a duplicate value
+        flash("Username or email already exists.", "danger")
+        return redirect(url_for("register"))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -54,20 +107,27 @@ def register():
         username = request.form.get("username", "").strip()  # fetches the fields and returns "" if missing
         email = request.form.get("email", "").strip()  # strip removes any whitespace
         password = request.form.get("password", "").strip()
+
+        if not str(email).endswith("@iwu.edu"):
+            flash("Only IWU students allowed.", 'danger')
+            return render_template("register.html")
+
         if not username or not email or not password:
             flash("Username, email, and password are required.", "danger")
             return render_template("register.html")
-        db = get_db()  # get database connection
-        try:
-            db.execute(
-                "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                (username, email, password),
-            )
-            db.commit()  # makes the changes permanent
-            flash("Registered! You can log in now.", "success")
-            return redirect(url_for("login"))
-        except sqlite3.IntegrityError:  # shows error when there's a duplicate value
-            flash("Username or email already exists.", "danger")
+        
+        otp_code = random.randint(1000, 9999)
+
+        db = get_db()
+
+        db.execute("INSERT INTO otp (code, email) VALUES (?, ?)", [otp_code, email])
+
+        db.commit()
+
+        yag.send(email, "Yoink: Requested OTP Code", f"Your OTP code is: {otp_code}")
+        
+        return render_template("otp_registration.html", username=username, email=email, password=password)
+        
     return render_template("register.html") if os.path.exists(
         os.path.join(BASE_DIR, "templates", "register.html")
     ) else render_template("layout.html", content="(Add register.html or use /login")
