@@ -1,8 +1,13 @@
 import os
 import sqlite3
+import yagmail
+import random
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
+from dotenv import load_dotenv
 
 app = Flask(__name__)  # creates the flask app object
+
+load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # gets the absolute path to the folder
 
@@ -16,6 +21,9 @@ app.config.update(
 
 # checks the existence of the upload directory
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+# Client for sending emails
+yag = yagmail.SMTP(os.environ.get("EMAIL_USERNAME", ""), os.environ.get("EMAIL_PASSWORD", ""))
 
 def get_db():
     if "db" not in g: # one connection per request
@@ -46,6 +54,51 @@ def init_db_command():
     init_db()
     print("Initialized the database.")
 
+@app.route('/send-otp', methods=["POST"])
+def send_otp():
+    print("form: ", request.form)
+    username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "").strip()
+    otp = request.form.get("otp", "").strip()
+
+    # Someone could get the right otp code, but create an account with a non @iwu.edu domain, by hitting the 
+    # endpoint directly
+    if not str(email).endswith("@iwu.edu"):
+        flash("Only IWU students allowed.", 'danger')
+        return render_template("register.html")
+
+    db = get_db()  # get database connection
+
+    otp_match = db.execute("SELECT * FROM otp WHERE email = ? AND code = ?", [email, otp]).fetchone()
+
+    if otp_match is None:
+        flash("Wrong OTP code.", "danger")
+        return render_template("otp_registration.html", email=email, username=username, password=password)
+    
+    otp_match_dict = dict(otp_match)
+    
+    # Technically not needed, but nice to have.
+    if not otp in otp_match_dict.values():
+        flash("Wrong OTP code.")
+        return render_template("otp_registration.html", email=email, username=username, password=password)
+
+    # Could technically use id, but email and code works fine too.
+    db.execute("DELETE FROM otp WHERE email = ? AND code = ?", [email, otp])
+    db.commit()
+
+    # Only if all checks go through, register the user
+    try:
+        db.execute(
+            "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+            (username, email, password),
+        )
+        db.commit()  # makes the changes permanent
+        flash("Registered! You can log in now.", "success")
+        return redirect(url_for("login"))
+    except sqlite3.IntegrityError:  # shows error when there's a duplicate value
+        flash("Username or email already exists.", "danger")
+        return redirect(url_for("register"))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -53,20 +106,27 @@ def register():
         username = request.form.get("username", "").strip()  # fetches the fields and returns "" if missing
         email = request.form.get("email", "").strip()  # strip removes any whitespace
         password = request.form.get("password", "").strip()
+
+        if not str(email).endswith("@iwu.edu"):
+            flash("Only IWU students allowed.", 'danger')
+            return render_template("register.html")
+
         if not username or not email or not password:
             flash("Username, email, and password are required.", "danger")
             return render_template("register.html")
-        db = get_db()  # get database connection
-        try:
-            db.execute(
-                "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-                (username, email, password),
-            )
-            db.commit()  # makes the changes permanent
-            flash("Registered! You can log in now.", "success")
-            return redirect(url_for("login"))
-        except sqlite3.IntegrityError:  # shows error when there's a duplicate value
-            flash("Username or email already exists.", "danger")
+        
+        otp_code = random.randint(1000, 9999)
+
+        db = get_db()
+
+        db.execute("INSERT INTO otp (code, email) VALUES (?, ?)", [otp_code, email])
+
+        db.commit()
+
+        yag.send(email, "Yoink: Requested OTP Code", f"Your OTP code is: {otp_code}")
+        
+        return render_template("otp_registration.html", username=username, email=email, password=password)
+        
     return render_template("register.html") if os.path.exists(
         os.path.join(BASE_DIR, "templates", "register.html")
     ) else render_template("layout.html", content="(Add register.html or use /login")
@@ -127,12 +187,12 @@ def index():
 
 @app.get("/items")
 def list_items():
+    """Lists all the items in the database"""
+    db = get_db()
 
     # redirects the user to the login page if logged out
     if "user_id" not in session:
         return redirect(url_for("login"))
-
-
 
     # otherwise we get all of the currently blocked users, split them into a list
     # and add the current users id to that list
@@ -169,6 +229,7 @@ def list_items():
 
 @app.get("/items/<int:item_id>")
 def item_detail(item_id: int):
+    """Returns the item details from database"""
     db = get_db()
     row = db.execute("""
     SELECT items.*, users.username, users.email
@@ -184,10 +245,14 @@ def item_detail(item_id: int):
 
 @app.route("/items/new", methods=["GET", "POST"])
 def create_item():
+    """Adds a post to the website"""
+
+    # asks the user log in, in order to be able to post
     if "user_id" not in session:
         flash("Please log in to post an item.", "warning")
         return redirect(url_for("login", next=request.url))
-
+    
+    # takes away the whitespace, and adds all the information to the database
     if request.method == "POST":
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
@@ -197,6 +262,7 @@ def create_item():
         contact = request.form.get("contact", "").strip()
         image = request.files.get("image")
 
+        # checks to make sure the user puts in the required data
         errors = []
         if not title:
             errors.append("Title is required.")
@@ -206,12 +272,14 @@ def create_item():
             errors.append("Contact is required.")
 
         image_path = None
+        # uploads the image, if image was provided
         try:
             if image and image.filename:
                 image_path = save_image(image)
         except ValueError as e:
             errors.append(str(e))
 
+        # if there are any errors, it'll flash red what the error is to the user
         if errors:
             for e in errors: flash(e, "danger")
             return render_template("items_new.html",
@@ -224,6 +292,7 @@ def create_item():
         """, (session["user_id"], title, description, category, condition, location, contact, image_path))
         db.commit()
 
+        # if no errors, the post will be added to the items_list page
         flash("Item posted!", "success")
         return redirect(url_for("list_items"))
 
@@ -232,13 +301,16 @@ def create_item():
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
 def edit_item(item_id: int):
+    """Allows the user to only edit in their own posts"""
     db = get_db()
     item = db.execute("SELECT * FROM items WHERE id = ?", (item_id, )).fetchone()
 
+    # returns error if the item isn't found
     if not item:
         flash("Item not found.", "warning")
         return redirect(url_for("my_items"))
 
+    # takes the information from the database
     if request.method == "POST":
         title = request.form.get("title", "").strip()
         description = request.form.get("description", "").strip()
@@ -248,6 +320,7 @@ def edit_item(item_id: int):
         contact = request.form.get("contact", "").strip()
         image = request.files.get("image")
 
+        # checks to make sure the user puts in the required data
         errors = []
         if not title:
             errors.append("Title is required.")
@@ -256,6 +329,7 @@ def edit_item(item_id: int):
         if not contact:
             errors.append("Contact is required.")
 
+        # uploads the image, if image was provided
         image_path = item["image_path"]
         try:
             if image and image.filename:
@@ -263,11 +337,13 @@ def edit_item(item_id: int):
         except ValueError as e:
             errors.append(str(e))
 
+        # if there are any errors, it'll flash red what the error is to the user
         if errors:
             for e in errors:
                 flash(e, "danger")
                 return render_template("items_edit.html", item=item, form=request.form)
 
+        # updates the database with the edited information
         db.execute("""
         UPDATE items 
         SET title = ?, description = ?, category = ?, condition = ?, location = ?, 
@@ -276,6 +352,7 @@ def edit_item(item_id: int):
         """, (title, description, category, condition, location, contact, image_path, item_id))
         db.commit()
 
+        # lets the user know it was updated
         flash("Item updated!", "success")
         return redirect(url_for("my_items"))
 
@@ -284,9 +361,12 @@ def edit_item(item_id: int):
 
 @app.route("/items/<int:item_id>/delete", methods=['POST'])
 def delete_item(item_id: int):
+    """Takes the id of the post, then deletes that post"""
     db = get_db()
+    # Looks for the item they want to delete
     item = db.execute("SELECT * FROM items WHERE id = ?", (item_id,)).fetchone()
 
+    # deletes that item
     db.execute("DELETE FROM items WHERE id = ?", (item_id,))
     db.commit()
 
@@ -304,9 +384,10 @@ def user_profile():
     items = db.execute(" SELECT * FROM items  where owner_id = ?", [user_id[0][0]]).fetchall()
 
     return(render_template("user_profile.html", user_name=user_name, items=items))
+
 @app.route("/my-items", methods=["GET"])
 def my_items():
-
+    """Shows the users only their post"""
     db = get_db()
 
     items = db.execute("SELECT * FROM items WHERE items.owner_id = ?", [session["user_id"]]).fetchall()
@@ -315,12 +396,16 @@ def my_items():
 
 @app.route("/search", methods=["POST"])
 def search():
+    """Searches for specific items"""
     db = get_db()
+    search_term = f"%{request.form["title"]}%"
 
+    # base case: where the user wants to go back to every post
     if request.form['title'] == '':
-        sorted_items = db.execute('SELECT * FROM items ORDER BY created_at DESC')
+        sorted_items = db.execute('SELECT * FROM items INNER JOIN users ON items.owner_id = users.id ORDER BY created_at DESC')
     else:
-        sorted_items = db.execute('SELECT * FROM items WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY created_at DESC', [request.form['title']]).fetchall()
+        # if not empty, it will show the item based on the characters they use for the search
+        sorted_items = db.execute('SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY items.created_at DESC', [search_term]).fetchall()
 
     return render_template("items_list.html", items=sorted_items)
 @app.route("/blocked_users", methods=[ "GET"] )

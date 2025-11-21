@@ -23,5 +23,12 @@ CREATE TABLE IF NOT EXISTS items (
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
+CREATE TABLE IF NOT EXISTS otp (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    code TEXT NOT NULL,
+    issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_items_owner   ON items(owner_id);
 CREATE INDEX IF NOT EXISTS idx_items_created ON items(created_at);
