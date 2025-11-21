@@ -7,9 +7,7 @@
             <input type="text" id="title" name="title" value="{{ (form.title if form else item.title) }}" required>
 
             <label for="description">Description *</label>
-            <textarea name="description" id="description" cols="30" rows="10" required>
-                {{ (form.description if form else item.description) }}
-            </textarea>
+            <textarea name="description" id="description" cols="30" rows="10" required>{{ (form.description if form else item.description) }}</textarea>
 
             <div class="row">
                 <div>
