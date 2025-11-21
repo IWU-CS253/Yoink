@@ -443,6 +443,10 @@ def blocked_users():
     # should be good to remove this when i fix the homepage
     return redirect(url_for('list_items'))
 
+@app.route("/blocked_users_list")
+def blocked_users_list():
+    return(render_template("blocked_users_list.html"))
+
 if __name__ == "__main__":
     app.run(debug=True)
 
