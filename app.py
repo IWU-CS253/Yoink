@@ -139,12 +139,20 @@ def list_items():
     db = get_db()
     current_blocked_users = db.execute("select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
 
-   
+    # if the user doesnt have any users blocked we just
+    # display all the post not including the user's posts
+    if current_blocked_users[0] == None:
+        rows = db.execute("SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100", [session["user_id"]])
+        return render_template("items_list.html", items=rows)
 
+    # creating a list of values by splitting the
+    # current blocked user. Then we add the current users
+    # id to the end since that will be used to restrict users
+    # from seeing their own items on the list_items page
     values = current_blocked_users[0].split(", ")
     values.append(str(session["user_id"]))
 
-    # creating a placeholder dynamically for all of the
+    # creating a placeholder dynamically for all the
     # users that the current user has blocked
     question_mark_placeholder = ""
     for i in range(len(current_blocked_users[0].split(", "))):
@@ -344,6 +352,7 @@ def blocked_users():
         placeholder = current_blocked_users[0] + ', ' + str(blocked_user_id)
         db.execute("update users set blocked_user_ids = ? where id=?", [placeholder, session["user_id"]])
         db.commit()
+        flash(f"{blocked_user} is now blocked!", "danger")
         return redirect(url_for('list_items'))
 
     # should be good to remove this when i fix the homepage
