@@ -467,8 +467,6 @@ def unblock_user():
     db = get_db()
     blocked_users = db.execute("Select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
     blocked_users = blocked_users[0].split(", ")
-
-
     blocked_users.remove(unblocked_user)
 
     # we then convert the new list into a string joined on
