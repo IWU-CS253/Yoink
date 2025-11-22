@@ -2,7 +2,7 @@
 {% block body %}
     {% for user in blocked_users_list %}
     <article class="card">
-    {{ user.username }} <form id="unblock-form"><button class="btn" type="submit" value="{{ user.username }}">Unblock</button></form id="unblock-form">
+    {{ user.username }} <form method="get"  action="{{ url_for('unblock_user') }}"><button name="unblock-form" value="{{ user.id }}" class="btn" type="submit" >Unblock</button></form>
     </article>
     {% endfor %}
 {% endblock %}
