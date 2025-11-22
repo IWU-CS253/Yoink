@@ -214,11 +214,7 @@ def list_items():
 
     # creating a placeholder dynamically for all the
     # users that the current user has blocked
-    question_mark_placeholder = ""
-    for i in range(len(current_blocked_users[0].split(", "))):
-        question_mark_placeholder = question_mark_placeholder + "?"
-        question_mark_placeholder = question_mark_placeholder + ", "
-    question_mark_placeholder = question_mark_placeholder[:-2]
+    question_mark_placeholder = placeholder_helper(current_blocked_users[0])
 
     #  creating a query string to keep all data secure and passing
     # our values into the query
@@ -445,54 +441,59 @@ def blocked_users():
 
 @app.route("/blocked_users_list")
 def blocked_users_list():
+    """Lists all the users that the current user has blocked."""
+
+    # getting the currently blocked users
     db = get_db()
     blocked_users = db.execute("Select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
 
-    #blocked_usernames = db.execute("Select username from users where id = ?", blocked_users[0]).fetchall()
-   # print(blocked_usernames)
-
     # creating a placeholder dynamically for all the
     # users that the current user has blocked
-    question_mark_placeholder = ""
-    for i in range(len(blocked_users[0].split(", "))):
-        question_mark_placeholder = question_mark_placeholder + "?"
-        question_mark_placeholder = question_mark_placeholder + ", "
-    question_mark_placeholder = question_mark_placeholder[:-2]
+    question_mark_placeholder = placeholder_helper(blocked_users[0])
+
+    # creating a query using those placeholders to get all
+    # of the blocked users
     query = f"Select username, id from users where id in ({question_mark_placeholder})"
     blocked_usernames = db.execute(query, blocked_users[0].split(", ")).fetchall()
-
-
     return(render_template("blocked_users_list.html", blocked_users_list= blocked_usernames))
 
 @app.route("/unblock_user")
 def unblock_user():
+    """Allows users to unblock users."""
+
+    # getting the currently blocked users and creating a list
+    # from them so we can easily remove the user to be unblocked.
     unblocked_user = request.args["unblock-form"]
     db = get_db()
     blocked_users = db.execute("Select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
     blocked_users = blocked_users[0].split(", ")
 
-    blocked_users.remove(str(unblocked_user))
-    placeholder = ""
 
-    
-    print(blocked_users)
+    blocked_users.remove(unblocked_user)
 
+    # we then convert the new list into a string joined on
+    # commas so w can maintain structure. We then update the current
+    # users blocked user list in the database.
+    placeholder = ", ".join(blocked_users)
+    db.execute("Update users set blocked_user_ids = ? where id = ?", [placeholder, session["user_id"]])
+    db.commit()
 
+    # return them to the same page which is the list
+    # of users that are currently blocked.
+    flash(f"{session["username"]} is now unblocked. You can now see their post.", "success")
     return (redirect(url_for('blocked_users_list')))
 
 def placeholder_helper(ls):
+    """Helper function for creating placeholders if needed."""
+
     # creating a placeholder dynamically for all the
     # users that the current user has blocked
     question_mark_placeholder = ""
-    for i in range(len(ls[0].split(", "))):
+    for i in range(len(ls.split(", "))):
         question_mark_placeholder = question_mark_placeholder + "?"
         question_mark_placeholder = question_mark_placeholder + ", "
     question_mark_placeholder = question_mark_placeholder[:-2]
-
     return question_mark_placeholder
-
-
-
 
 if __name__ == "__main__":
     app.run(debug=True)
