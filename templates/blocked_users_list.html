@@ -1,6 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
+    {% for user in blocked_users_list %}
     <article class="card">
-    asasas <button class="btn" >Unblock</button>
+    {{ user.username }} <form id="unblock-form"><button class="btn" type="submit" value="{{ user.username }}">Unblock</button></form id="unblock-form">
     </article>
+    {% endfor %}
 {% endblock %}

@@ -445,7 +445,26 @@ def blocked_users():
 
 @app.route("/blocked_users_list")
 def blocked_users_list():
-    return(render_template("blocked_users_list.html"))
+    db = get_db()
+    blocked_users = db.execute("Select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
+
+    #blocked_usernames = db.execute("Select username from users where id = ?", blocked_users[0]).fetchall()
+   # print(blocked_usernames)
+
+    # creating a placeholder dynamically for all the
+    # users that the current user has blocked
+    question_mark_placeholder = ""
+    for i in range(len(blocked_users[0].split(", "))):
+        question_mark_placeholder = question_mark_placeholder + "?"
+        question_mark_placeholder = question_mark_placeholder + ", "
+    question_mark_placeholder = question_mark_placeholder[:-2]
+    query = f"Select username from users where id in ({question_mark_placeholder})"
+    blocked_usernames = db.execute(query, blocked_users[0].split(", ")).fetchall()
+
+
+    return(render_template("blocked_users_list.html", blocked_users_list= blocked_usernames))
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
