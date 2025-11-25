@@ -17,6 +17,10 @@
 
 
     }
+
+    .empty-message{
+        width: fit-content;
+    }
     </style>
     {% if blocked_users_list %}
         <div class="container">
@@ -29,6 +33,6 @@
     {% endfor %}
         </div>
     {% else %}
-        <article class="card">You do not have any users currently blocked.</article>
+        <article class="card empty-message">You do not have any users currently blocked.</article>
     {% endif %}
 {% endblock %}
