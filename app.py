@@ -23,7 +23,7 @@ app.config.update(
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # Client for sending emails
-yag = yagmail.SMTP(os.environ.get("EMAIL_USERNAME", ""), os.environ.get("EMAIL_PASSWORD", ""))
+# yag = yagmail.SMTP(os.environ.get("EMAIL_USERNAME", ""), os.environ.get("EMAIL_PASSWORD", ""))
 
 def get_db():
     if "db" not in g: # one connection per request
@@ -123,7 +123,7 @@ def register():
 
         db.commit()
 
-        yag.send(email, "Yoink: Requested OTP Code", f"Your OTP code is: {otp_code}")
+        # yag.send(email, "Yoink: Requested OTP Code", f"Your OTP code is: {otp_code}")
         
         return render_template("otp_registration.html", username=username, email=email, password=password)
         
