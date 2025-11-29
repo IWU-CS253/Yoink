@@ -394,7 +394,7 @@ def my_items():
 def search():
     """Searches for specific items"""
     db = get_db()
-    search_term = f"%{request.form["title"]}%"
+    search_term = f"%{request.form['title']}%"
 
     # base case: where the user wants to go back to every post
     if request.form['title'] == '':
