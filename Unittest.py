@@ -111,7 +111,7 @@ class FlaskrTestCase(unittest.TestCase):
             item = db.execute("SELECT * FROM items").fetchone()
             assert item["title"] == "Lamp"
 
-    def delete_item(self):
+    def test_delete_item(self):
         self.complete_registration('admin', 'admin@iwu.edu', 'default')
         self.login('admin', 'default')
         self.create_item('desk', 'a nick desk', 'Other',
