@@ -16,7 +16,6 @@ class FlaskrTestCase(unittest.TestCase):
         os.close(self.db_fd)
         os.unlink(flaskr.app.config['DATABASE'])
 
-    # Helper: full registration including OTP
     def complete_registration(self, username, email, password):
         self.app.post('/register', data=dict(
             username=username,
@@ -24,7 +23,6 @@ class FlaskrTestCase(unittest.TestCase):
             password=password
         ), follow_redirects=True)
 
-        # Retrieve OTP from DB
         with flaskr.app.app_context():
             db = flaskr.get_db()
             row = db.execute("SELECT code FROM otp WHERE email = ?", (email,)).fetchone()
@@ -42,18 +40,40 @@ class FlaskrTestCase(unittest.TestCase):
             username=username,
             password=password
         ), follow_redirects=True)
+    
+    def create_item(self, title, description, category, condition, location, contact, image):
+        return self.app.post('/items/new', data=dict(
+            title = title,
+            description = description,
+            category = category,
+            condition = condition,
+            location = location,
+            contact = contact,
+            image = image
+        ), follow_redirects=True)
 
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
 
     def test_login_logout(self):
         self.complete_registration('admin', 'admin@iwu.edu', 'default')
-
         rv = self.login('admin', 'default')
         assert b'Welcome, admin' in rv.data
-
         rv = self.logout()
         assert b'Logged out.' in rv.data
+
+    def test_create_item(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.login('admin', 'default')
+        rv = self.create_item('desk', 'a nick desk', 'Other',
+                              'Good', 'Magil', '123@iwu.edu', None)
+        assert b'Item posted!' in rv.data
+
+        with flaskr.app.app_context():
+            db = flaskr.get_db()
+            items = db.execute("SELECT * FROM items").fetchall()
+            assert len(items) == 1
+
         
 if __name__ == '__main__':
     unittest.main()
