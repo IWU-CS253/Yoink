@@ -53,15 +53,19 @@ class FlaskrTestCase(unittest.TestCase):
         ), follow_redirects=True)
 
     def edit(self, title, description, category, condition, location, contact, image):
-        return self.app.post('/items/<int:item_id>/edit', data=dict(
-            title=title,
-            description=description,
-            category=category,
-            condition=condition,
-            location=location,
-            contact=contact,
-            image=image
-        ), follow_redirects=True)
+        with flaskr.app.app_context():
+            db = flaskr.get_db()
+            item = db.execute("SELECT * FROM items").fetchone()
+            item_id = item["id"]
+            return self.app.post(f'/items/{item_id}/edit', data=dict(
+                title=title,
+                description=description,
+                category=category,
+                condition=condition,
+                location=location,
+                contact=contact,
+                image=image
+            ), follow_redirects=True)
 
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
