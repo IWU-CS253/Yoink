@@ -52,6 +52,17 @@ class FlaskrTestCase(unittest.TestCase):
             image = image
         ), follow_redirects=True)
 
+    def edit(self, title, description, category, condition, location, contact, image):
+        return self.app.post('/items/<int:item_id>/edit', data=dict(
+            title=title,
+            description=description,
+            category=category,
+            condition=condition,
+            location=location,
+            contact=contact,
+            image=image
+        ), follow_redirects=True)
+
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
 
@@ -73,6 +84,22 @@ class FlaskrTestCase(unittest.TestCase):
             db = flaskr.get_db()
             items = db.execute("SELECT * FROM items").fetchall()
             assert len(items) == 1
+
+    def test_edit_item(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.login('admin', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+
+        rv = self.edit('Lamp', 'desk lamp', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        assert b"Item updated!" in rv.data
+
+        with flaskr.app.app_context():
+            db = flaskr.get_db()
+            item = db.execute("SELECT * FROM items").fetchone()
+            assert item["title"] == "Lamp"
+
 
         
 if __name__ == '__main__':
