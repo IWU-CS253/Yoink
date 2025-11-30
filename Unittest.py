@@ -77,6 +77,9 @@ class FlaskrTestCase(unittest.TestCase):
     def search(self, title):
         return self.app.post('/search', data=dict(title=title), follow_redirects=True)
 
+    def block_user(self, user):
+        return self.app.post('/blocked_users', data=dict(user=user), follow_redirects=True)
+
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
 
@@ -132,6 +135,23 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.search('desk')
         assert b"desk" in rv.data
         assert b"lamp" not in rv.data
-        
+
+    def test_block_user(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
+
+        self.login('admin2', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        self.logout()
+
+        self.login('admin', 'default')
+
+        rb = self.block_user('admin2')
+        assert b'blocked' in rb.data.lower()
+
+        rv = self.search('desk')
+        assert b'desk' not in rv.data
+
 if __name__ == '__main__':
     unittest.main()
