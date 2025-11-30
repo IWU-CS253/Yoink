@@ -74,6 +74,9 @@ class FlaskrTestCase(unittest.TestCase):
             item_id = item["id"]
             return self.app.post(f'/items/{item_id}/delete', follow_redirects=True)
 
+    def search(self, title):
+        return self.app.post('/search', data=dict(title=title), follow_redirects=True)
+
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
 
@@ -119,6 +122,16 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.delete()
         assert b"Item deleted successfully." in rv.data
 
+    def test_search(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.login('admin', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        self.create_item('lamp', 'lamp desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        rv = self.search('desk')
+        assert b"desk" in rv.data
+        assert b"lamp" not in rv.data
         
 if __name__ == '__main__':
     unittest.main()
