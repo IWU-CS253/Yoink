@@ -8,9 +8,7 @@ class FlaskrTestCase(unittest.TestCase):
     def setUp(self):
         self.db_fd, flaskr.app.config['DATABASE'] = tempfile.mkstemp()
         flaskr.app.testing = True
-        flaskr.app.config["WTF_CSRF_ENABLED"] = False
         self.app = flaskr.app.test_client()
-
         with flaskr.app.app_context():
             flaskr.init_db()
 
@@ -53,7 +51,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         rv = self.login('admin', 'default')
         assert b'Welcome, admin' in rv.data
-        
+
         rv = self.logout()
         assert b'Logged out.' in rv.data
         
