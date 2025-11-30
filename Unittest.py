@@ -38,13 +38,13 @@ class FlaskrTestCase(unittest.TestCase):
 
     def test_login_logout(self):
         rv = self.login('admin', 'default')
-        assert b'You were logged in' in rv.data
+        assert b'Welcome, row[username]' in rv.data
         rv = self.logout()
-        assert b'You were logged out' in rv.data
+        assert b'Logged out.' in rv.data
         rv = self.login('adminx', 'default')
-        assert b'Invalid username' in rv.data
+        assert b'"Invalid username or password.' in rv.data
         rv = self.login('admin', 'defaultx')
-        assert b'Invalid password' in rv.data
+        assert b'"Invalid username or password.' in rv.data
 
 if __name__ == '__main__':
     unittest.main()
