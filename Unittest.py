@@ -48,11 +48,8 @@ class FlaskrTestCase(unittest.TestCase):
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
 
-    def test_register(self):
-        ra = self.register('admin', 'admin@iwu.edu', 'default')
-        assert b'You were registered' in ra.data
-
     def test_login_logout(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
         rv = self.login('admin', 'default')
         assert b'Welcome, admin' in rv.data
         rv = self.logout()
