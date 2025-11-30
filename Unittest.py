@@ -67,6 +67,13 @@ class FlaskrTestCase(unittest.TestCase):
                 image=image
             ), follow_redirects=True)
 
+    def delete(self):
+        with flaskr.app.app_context():
+            db = flaskr.get_db()
+            item = db.execute("SELECT * FROM items").fetchone()
+            item_id = item["id"]
+            return self.app.post(f'/items/{item_id}/delete', follow_redirects=True)
+
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
 
@@ -104,6 +111,13 @@ class FlaskrTestCase(unittest.TestCase):
             item = db.execute("SELECT * FROM items").fetchone()
             assert item["title"] == "Lamp"
 
+    def delete_item(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.login('admin', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        rv = self.delete()
+        assert b"Item deleted successfully." in rv.data
 
         
 if __name__ == '__main__':
