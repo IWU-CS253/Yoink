@@ -177,7 +177,8 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'desk' not in rv.data
 
         self.unblock_user()
-        assert b'desk' in rv.data
+        rb = self.search('desk')
+        assert b'desk' in rb.data
 
 if __name__ == '__main__':
     unittest.main()
