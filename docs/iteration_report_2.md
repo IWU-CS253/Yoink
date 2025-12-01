@@ -6,8 +6,8 @@ Team Members
 
 Chris - Setting up the search bar, documenting the code
 Earl - Adding an user page and user blocking feature
-Hirat - Modiying, deleting post and grid columns
-Yohance - Secure login (password hasing, email specific signup)
+Hirat - Modifying, deleting post and grid columns
+Yohance - Secure login (password hashing, email specific signup)
 
 Iteration Goal is to add some more features to be able to login securely, modify and delete posts, search items, and block any unwanted user.
 
@@ -38,7 +38,7 @@ Things to do:
 - edit the route to the list items page (homepage) to not display things from the blocks users.  
 
 
-Modiying, deleting post and grid columns (Hirat)
+Modifying, deleting post and grid columns (Hirat)
 
 Work Completed:
 - Added the delete and edit option on the posted items list. 
@@ -49,11 +49,11 @@ Problems:
 - Had some github issues, mainly with the db file which was creating merge conflicts.
 
 Things to do:
-- Limit the title, description and contact info charracters, so that it doesn't create problem
-- Make the posts details available only to logge in users.
+- Limit the title, description and contact info characters, so that it doesn't create problem
+- Make the posts details available only to logged in users.
 
 
-Secure login (password hasing, email specific signup) (Yohance)
+Secure login (password hashing, email specific signup) (Yohance)
 
 - security measures include ensuring passwords aren't saved in their raw form in the database, by hashing them on sign up. 
 - Following log in attempts compare hashes between the stored password in the database, and the password given by the user, which is initially hashed before being compared. 
@@ -65,4 +65,4 @@ Challenges: Github merge conflicts, adding the blocking feature
 
 Next steps: Chris: will work to make search more flexible Hirat: will work on making the details available only to logged in users and limit characters for posts. Yohance: will work on unit testing. Earl: Will work on implementing the rest of the blocking feature.
 
-Team Feedback: Chris: Good job having the searh bar working Hirat: check on edge cases and look into github issues Yohance: nice work checking on the login/ sign up but try not to wait till the last minute Earl: Good approach towards the blocking feature, but try to reach for help earlier if needed.
+Team Feedback: Chris: Good job having the search bar working Hirat: check on edge cases and look into github issues Yohance: nice work checking on the login/ sign up but try not to wait till the last minute Earl: Good approach towards the blocking feature, but try to reach for help earlier if needed.

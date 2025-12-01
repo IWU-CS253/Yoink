@@ -33,7 +33,7 @@
 
         <div style="padding: 1rem; flex:1; display: flex; flex-direction: column;">
             <h3 style="margin:0 0 0.5rem 0;">
-                <a href="{{ url_for('item_detail', item_id=it.id) }}">{{ it.title }}</a>
+                <a href="{{ url_for('item_detail', item_id=it.id) }}">{{ it.title[:50] }}{% if it.title|length > 50 %}…{% endif %}</a>
             </h3>
 
             <p style="margin:0 0 0.5rem 0; color:#555; flex: 1">
@@ -50,13 +50,11 @@
                     {% endif %}
                 </p>
 
-                <p style="=margin: 0.5rem 0 0 0; color: #999; font-size: 0.8rem">
-                    Posted by
-                    <form method="post" action="{{ url_for('user_profile') }}" style="display: inline;">
-                        <input type="hidden" name="profile_username" value="{{ it.username }}">
-                        <button style="background: none; border: none; padding: 0; color: #00bb66" type="submit">{{ it.username }}</button>
-                    </form>
-                    · {{ it.created_at }}
+                <p style="=margin: 0.5rem 0 0 0; color: #999; font-size: 0.8rem"> Posted by
+                <form method="post" action="{{ url_for('user_profile') }}" style="display: inline;">
+                    <input type="hidden" name="profile_username" value="{{ it.username }}">
+                    <button style="background: none; border: none; padding: 0; color: #00bb66" type="submit">{{ it.username }}</button>
+                </form>· {{ it.created_at }}
                 </p>
             </div>
         </div>
