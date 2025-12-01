@@ -4,11 +4,13 @@
     <div class="card">
         <h2 style="margin-top: 0; ">Edit</h2>
         <form method="post" enctype="multipart/form-data">
-            <label for="title">Title *</label>
-            <input type="text" id="title" name="title" value="{{ (form.title if form else item.title) }}" required>
+            <label for="title">Title * (max 100 characters)</label>
+            <input type="text" id="title" name="title" value="{{ (form.title if form else item.title) }}" maxlength="100" required>
 
-            <label for="description">Description *</label>
-            <textarea name="description" id="description" cols="30" rows="10" required>{{ (form.description if form else item.description) }}</textarea>
+            <label for="description">Description * (max 350 characters)</label>
+            <textarea name="description" id="description" cols="30" rows="10" maxlength="350" required>
+                {{ (form.description if form else item.description) }}
+            </textarea>
 
             <div class="row">
                 <div>
@@ -31,11 +33,11 @@
                 </div>
             </div>
 
-            <label for="location">Pickup location (optional)</label>
-            <input type="text" id="location" name="location" value="{{ (form.location if form else item.location) }}">
+            <label for="location">Pickup location (optional, max 50 characters)</label>
+            <input type="text" id="location" name="location" value="{{ (form.location if form else item.location) }}" maxlength="50">
 
-            <label for="contact">Contact (email/phone/IG) *</label>
-            <input type="text" id="contact" name="contact" value="{{ (form.contact if form else item.contact) }}" required>
+            <label for="contact">Contact (email/phone/IG) * (max 50 characters)</label>
+            <input type="text" id="contact" name="contact" value="{{ (form.contact if form else item.contact) }}" maxlength="50" required>
 
             {% if item.image_path %}
                 <div style="margin: 1rem 0;">
@@ -44,7 +46,7 @@
                 </div>
             {% endif %}
 
-            <label for="image">Upload new image (optional, png/jpg/jpeg/gif/webp/heic, <- 2MB)</label>
+            <label for="image">Upload new image (optional, png/jpg/jpeg/gif/webp/heic, <- 5MB)</label>
             <input type="file" id="image" name="image" accept=".png, .jpg, .jpeg, .gif, .webp, .heic">
 
             <div style="margin-top: 1rem">
