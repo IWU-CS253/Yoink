@@ -23,7 +23,7 @@ app.config.update(
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # Client for sending emails
-yag = yagmail.SMTP(os.environ.get("EMAIL_USERNAME", ""), os.environ.get("EMAIL_PASSWORD", ""))
+yag = yagmail.SMTP(os.environ.get("EMAIL_USERNAME", "digreddit7@gmail.com"), os.environ.get("EMAIL_PASSWORD", "urgz cynk hnoi uhov"))
 
 def get_db():
     if "db" not in g: # one connection per request
@@ -395,10 +395,11 @@ def search():
     """Searches for specific items"""
     db = get_db()
     search_term = f"%{request.form['title']}%"
+    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",[session["user_id"]]).fetchone()
 
     # base case: where the user wants to go back to every post
     if request.form['title'] == '':
-        sorted_items = db.execute('SELECT * FROM items INNER JOIN users ON items.owner_id = users.id ORDER BY created_at DESC')
+        sorted_items = db.execute(f'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id Where owner_id not in () ORDER BY created_at DESC')
     else:
         # if not empty, it will show the item based on the characters they use for the search
         sorted_items = db.execute('SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY items.created_at DESC', [search_term]).fetchall()
