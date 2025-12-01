@@ -79,7 +79,7 @@ class FlaskrTestCase(unittest.TestCase):
 
     # codehelp, helped me with the logic behind the data
     def block_user(self):
-        return self.app.get('/blocked_users?blocked_users=admin2', follow_redirects=True)
+        return self.app.get('/blocked_users?blocked_user=admin2', follow_redirects=True)
 
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
