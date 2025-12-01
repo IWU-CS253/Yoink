@@ -399,7 +399,7 @@ def search():
     if current_blocked_users[0] is not None and current_blocked_users is not None:
         current_blocked_users = current_blocked_users[0].strip().split(',')
     else:
-        current_blocked_users = None
+        current_blocked_users = []
     
     question_mark_holder = ''
 
