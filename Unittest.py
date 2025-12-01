@@ -82,7 +82,11 @@ class FlaskrTestCase(unittest.TestCase):
         return self.app.get('/blocked_users?blocked_user=admin2', follow_redirects=True)
     
     def unblock_user(self):
-        return self.app.get('/unblock_user', query_string={'unblock-form': '0'}, follow_redirects=True)
+        with flaskr.app.app_context():
+            db = flaskr.get_db()
+            user = db.execute("SELECT id FROM users WHERE username = ?", ('admin2',)).fetchone()
+            user_id = user['id']
+        return self.app.get('/unblock_user', query_string={'unblock-form': str(user_id)}, follow_redirects=True)
     
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
