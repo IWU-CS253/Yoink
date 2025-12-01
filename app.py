@@ -397,7 +397,7 @@ def search():
     search_term = f"%{request.form['title']}%"
     current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",[session["user_id"]]).fetchone()
     if current_blocked_users[0] is not None and current_blocked_users is not None:
-            current_blocked_users = current_blocked_users[0].strip().split(',')
+        current_blocked_users = current_blocked_users[0].strip().split(',')
     else:
         current_blocked_users = []
     question_mark_holder = ''
