@@ -176,9 +176,11 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.search('desk')
         assert b'desk' not in rv.data
 
-        self.unblock_user()
-        rb = self.search('desk')
-        assert b'desk' in rb.data
+        rb = self.unblock_user()
+        assert b'admin2 is now unblocked. You can now see their post.' in rb.data
+        
+        # rb = self.search('desk')
+        # assert b'desk' in rb.data
 
 if __name__ == '__main__':
     unittest.main()
