@@ -57,13 +57,6 @@
                     {% endif %}
                 </p>
 
-<<<<<<< HEAD
-                <p style="=margin: 0.5rem 0 0 0; color: #999; font-size: 0.8rem"> Posted by
-                <form method="post" action="{{ url_for('user_profile') }}" style="display: inline;">
-                    <input type="hidden" name="profile_username" value="{{ it.username }}">
-                    <button style="background: none; border: none; padding: 0; color: #00bb66" type="submit">{{ it.username }}</button>
-                </form>· {{ it.created_at }}
-=======
                 <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 0.8rem">
                     Posted by
                     <form method="post" action="{{ url_for('user_profile') }}" style="display: inline;">
@@ -71,7 +64,6 @@
                         <button style="background: none; border: none; padding: 0; color: #00bb66" type="submit">{{ it.username }}</button>
                     </form>
                     · {{ it.created_at }}
->>>>>>> 933f05bdb825fdb1dd5face7c29e4dff9231b972
                 </p>
             </div>
         </div>
