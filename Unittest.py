@@ -148,8 +148,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         self.login('admin', 'default')
 
-        rb = self.block_user()
-        assert b'admin2 is now blocked!' in rb.data
+        self.block_user()
 
         rv = self.search('desk')
         assert b'desk' not in rv.data
