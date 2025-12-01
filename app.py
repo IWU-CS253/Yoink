@@ -405,8 +405,6 @@ def search():
     for i in current_blocked_users:
         if i != '':
             question_mark_holder += '?,'
-            
-    if current_blocked_users:
         question_mark_holder = question_mark_holder[:-1]
 
     # base case: where the user wants to go back to every post
