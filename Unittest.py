@@ -77,8 +77,8 @@ class FlaskrTestCase(unittest.TestCase):
     def search(self, title):
         return self.app.post('/search', data=dict(title=title), follow_redirects=True)
 
-    def block_user(self):
-        return self.app.get('/blocked_users?username=admin2', follow_redirects=True)
+    def block_user(self, user):
+        return self.app.get('/blocked_users', data=dict(user=user), follow_redirects=True)
 
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
@@ -136,22 +136,25 @@ class FlaskrTestCase(unittest.TestCase):
         assert b"desk" in rv.data
         assert b"lamp" not in rv.data
 
-    # def test_block_user(self):
-    #     self.complete_registration('admin', 'admin@iwu.edu', 'default')
-    #     self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
+    def test_block_user(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
 
-    #     self.login('admin2', 'default')
-    #     self.create_item('desk', 'a nick desk', 'Other',
-    #                      'Good', 'Magil', '123@iwu.edu', None)
-    #     self.logout()
+        self.login('admin2', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        self.logout()
 
-    #     self.login('admin', 'default')
+        self.login('admin', 'default')
 
-    #     rb = self.block_user()
-    #     assert b'admin2 is now blocked!' in rb.data
+        rb = self.block_user('admin2')
+        assert b'admin2 is now blocked!' in rb.data
 
-    #     rv = self.search('desk')
-    #     assert b'desk' not in rv.data
+        rv = self.search('desk')
+        assert b'desk' not in rv.data
+    
+    def test_unblock_user(self):
+        return()
 
 if __name__ == '__main__':
     unittest.main()
