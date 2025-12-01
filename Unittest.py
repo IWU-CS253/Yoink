@@ -82,7 +82,7 @@ class FlaskrTestCase(unittest.TestCase):
         return self.app.get('/blocked_users?blocked_user=admin2', follow_redirects=True)
     
     def unblock_user(self):
-        return self.app.get('/unblock_user', {'unblock-form': 'admin2'}, follow_redirects=True)
+        return self.app.get('/unblock_user', query_string={'unblock-form': '2'}, follow_redirects=True)
     
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
