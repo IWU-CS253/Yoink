@@ -77,8 +77,8 @@ class FlaskrTestCase(unittest.TestCase):
     def search(self, title):
         return self.app.post('/search', data=dict(title=title), follow_redirects=True)
 
-    def block_user(self, user):
-        return self.app.get('/blocked_users', data=dict(user=user), follow_redirects=True)
+    def block_user(self):
+        return self.app.get('/blocked_users?blocked_users=admin2', follow_redirects=True)
 
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
@@ -147,7 +147,7 @@ class FlaskrTestCase(unittest.TestCase):
 
         self.login('admin', 'default')
 
-        rb = self.block_user('admin2')
+        rb = self.block_user()
         assert b'admin2 is now blocked!' in rb.data
 
         rv = self.search('desk')
