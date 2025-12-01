@@ -396,10 +396,11 @@ def search():
     db = get_db()
     search_term = f"%{request.form['title']}%"
     current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",[session["user_id"]]).fetchone()
-    if current_blocked_users[0] is not None and current_blocked_users is not None:
-            current_blocked_users = current_blocked_users[0].strip().split(',')
+    if current_blocked_users[0] is not None and current_blocked_users is not None and current_blocked_users[0] != '':
+        current_blocked_users = current_blocked_users[0].strip().split(',')
     else:
-        current_blocked_users = []
+        current_blocked_users = None
+    
     question_mark_holder = ''
 
     for i in current_blocked_users:
