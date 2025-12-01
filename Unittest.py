@@ -77,6 +77,7 @@ class FlaskrTestCase(unittest.TestCase):
     def search(self, title):
         return self.app.post('/search', data=dict(title=title), follow_redirects=True)
 
+    # codehelp, helped me with the logic behind the data
     def block_user(self):
         return self.app.post('/blocked_users', data={'blocked_users': 'admin2'}, follow_redirects=True)
 
