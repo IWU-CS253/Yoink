@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <style>
+    .card {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 33%;
+        flex-direction: column;
+
+    }
+    .container{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+
+    }
+
+    .empty-message{
+        width: fit-content;
+    }
+    </style>
+    {% if blocked_users_list %}
+        <div class="container">
+    {% for user in blocked_users_list %}
+    <article class="card">
+    <img class="user_photo" src="https://picsum.photos/200/300">
+        <a>{{ user.username }} </a>
+        <form method="get"  action="{{ url_for('unblock_user') }}"><button name="unblock-form" value="{{ user.id }}" class="btn" type="submit" >Unblock</button></form>
+    </article>
+    {% endfor %}
+        </div>
+    {% else %}
+        <article class="card empty-message">You do not have any users currently blocked.</article>
+    {% endif %}
+{% endblock %}

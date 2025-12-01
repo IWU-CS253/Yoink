@@ -33,6 +33,13 @@
         }
         footer {
             margin-top: auto;
+            display: flex;
+            justify-content: center;
+        }
+        .user_photo{
+        height: 120px;
+            width: 120px;
+            border-radius: 50%;
         }
         nav a { color:#fff; margin-right: 1rem; text-decoration: none; }
         .card { background:#fff; border:1px solid #e5e5e5; border-radius:12px; padding:1rem; margin-bottom:1rem; }
@@ -53,16 +60,24 @@
     </style>
 </head>
 <body>
+<!--Very top of the page-->
 <header>
     <nav>
+        <!--Home link-->
         <a href="{{ url_for('list_items') }}">Home</a>
         {%  if session.get('user_id') %}
+            <!--Post item link-->
             <a href="{{ url_for('create_item') }}">Post Item</a>
+            <!--User's item page link-->
             <a href="{{ url_for('my_items') }}">My items</a>
+            <!--User's blocked users page link-->
+            <a href="{{ url_for('blocked_users_list') }}">Blocked Users</a>
+            <!--logout user button-->
             <form action="{{ url_for('logout') }}" method="post" style="display: inline">
                 <button class="btn" style="margin-left: 1rem">Log out ({{ session['username'] }})</button>
             </form>
         {% else %}
+            <!--Links to the registar and log in page-->
             <a href="{{ url_for('login') }}">Log in</a>
             <a href="{{ url_for('register') }}">Register</a>
         {% endif %}
@@ -83,6 +98,7 @@
   {% endblock %}
 </main>
 
+<!--Copyright-->
 <footer>
   <small>&copy; {{ 2025 }} Yoink</small>
 </footer>

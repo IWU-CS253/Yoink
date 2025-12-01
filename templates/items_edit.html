@@ -1,15 +1,21 @@
 {% extends 'layout.html' %}
 {% block body %}
+    <!--The edit page-->
     <div class="card">
         <h2 style="margin-top: 0; ">Edit</h2>
         <form method="post" enctype="multipart/form-data">
             <label for="title">Title * (max 100 characters)</label>
             <input type="text" id="title" name="title" value="{{ (form.title if form else item.title) }}" maxlength="100" required>
 
+<<<<<<< HEAD
             <label for="description">Description * (max 350 characters)</label>
             <textarea name="description" id="description" cols="30" rows="10" maxlength="350" required>
                 {{ (form.description if form else item.description) }}
             </textarea>
+=======
+            <label for="description">Description *</label>
+            <textarea name="description" id="description" cols="30" rows="10" required>{{ (form.description if form else item.description) }}</textarea>
+>>>>>>> 933f05bdb825fdb1dd5face7c29e4dff9231b972
 
             <div class="row">
                 <div>
