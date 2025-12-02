@@ -1,8 +1,8 @@
 import os
 import sqlite3
 import random
-from flask import Blueprint, g, render_template, request, redirect, url_for, flash, session
-from app import get_db, rate_limit_by_identifier, yag, BASE_DIR
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from utils import get_db, rate_limit_by_identifier, yag, BASE_DIR
 
 auth_bp = Blueprint('auth', __name__)
 

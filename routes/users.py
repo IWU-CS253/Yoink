@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from app import get_db, login_required, placeholder_helper
+from utils import get_db, login_required, placeholder_helper
 
 users_bp = Blueprint('users', __name__)
 

@@ -1,6 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from app import get_db, login_required, rate_limit_by_user, owns_resource, save_image, placeholder_helper
-
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
+from utils import get_db, login_required, rate_limit_by_user, owns_resource, save_image, placeholder_helper
 items_bp = Blueprint('items', __name__)
 
 @items_bp.route("/")
@@ -89,7 +88,7 @@ def create_item():
         # uploads the image, if image was provided
         try:
             if image and image.filename:
-                image_path = save_image(image)
+                image_path = save_image(image, current_app.config["UPLOAD_FOLDER"], current_app.config["ALLOWED_EXTENSIONS"])
         except ValueError as e:
             errors.append(str(e))
 
@@ -150,7 +149,7 @@ def edit_item(item_id: int):
         image_path = item["image_path"]
         try:
             if image and image.filename:
-                image_path = save_image(image)
+                image_path = save_image(image, current_app.config["UPLOAD_FOLDER"], current_app.config["ALLOWED_EXTENSIONS"])
         except ValueError as e:
             errors.append(str(e))
 
