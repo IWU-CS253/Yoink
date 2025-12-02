@@ -195,45 +195,50 @@ def list_items():
         return redirect(url_for("login"))
 
     # otherwise we get all the currently blocked users of the current user
-    # and the list of users who have the currently blocked user bloked
+    # and the list of users who have the currently blocked user, blocked
     db = get_db()
-    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
+    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",
+                                       [session["user_id"]]).fetchone()
     blocked_by = db.execute("select blocked_by from users where id = ?", [session["user_id"]]).fetchone()
 
-    # if the user doesn't have any users blocked we just
-    # display all the post not including the user's posts
+    # if the user doesn't have any users blocked we and the user is not blocked by
+    # anyone then we just display all the post not including the current user's posts.
+    # (this check is to make sure our rows are not empty)
     if current_blocked_users == None  and blocked_by == None:
         rows = db.execute("SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100", [session["user_id"]])
         return render_template("items_list.html", items=rows)
 
-
-    # creating a list of values by splitting the
-    # current blocked user. Then we add the current users
-    # id to the end since that will be used to restrict users
-    # from seeing their own items on the list_items page
+    # if the current user have any blocked users or is blocked by anyone
+    # we concatenate those two strings
     if current_blocked_users[0] is not None and blocked_by[0] is not None:
-        all_ids = current_blocked_users[0] +", "+ blocked_by[0]
+        user_ids = current_blocked_users[0] +", "+ blocked_by[0]
 
-
+    # if we get rows, but the rows are empty (empty string), we just
+    # display all items because the user do not have anyone blocked or
+    # is not blocked by any other user.
     elif current_blocked_users[0] is None and blocked_by[0] is  None:
         rows = db.execute(
             "SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100",
             [session["user_id"]])
         return render_template("items_list.html", items=rows)
+
+    # two edge cases to handle
+    # if one of either string is empty
     elif current_blocked_users[0] is None and blocked_by[0] is not None:
-        all_ids = blocked_by[0]
-
-
+        user_ids = blocked_by[0]
     elif current_blocked_users[0] is not None and blocked_by[0] is  None:
-        all_ids = current_blocked_users[0]
+        user_ids = current_blocked_users[0]
 
-    values = all_ids.split(", ")
+    # creating a list of values by splitting the
+    # current ids list. Then we add the current users
+    # id to the end since that will be used to restrict users
+    # from seeing their own items on the list_items page
+    values = user_ids.split(", ")
     values.append(session["user_id"])
 
     # creating a placeholder dynamically for all the
     # users that the current user has blocked
-    question_mark_placeholder = placeholder_helper(all_ids)
-
+    question_mark_placeholder = placeholder_helper(user_ids)
 
     # creating a query string to keep all data secure and passing
     # our values into the query
@@ -434,27 +439,29 @@ def blocked_users():
 
     # getting the current user's id and the username of the blocked user
     # submitted via block button. Then using the blocked user's username
-    # to query the database for their id.
+    # to query the database for their id. Then using the id to get the other user's
+    # blocked_by list so it can be updated
     current_user_id = session["user_id"]
     blocked_user = request.args["blocked_user"]
-    blocked_by = db.execute("select blocked_by from users where id = ?",
-                            [blocked_user]).fetchone()
     blocked_user_id = db.execute("SELECT id FROM users WHERE username = ?", [blocked_user]).fetchall()[0][0]
     blocked_by = db.execute("select blocked_by from users where id = ?",
                             [blocked_user_id]).fetchone()
-
 
     # if the user hasn't blocked anyone yet, we update their blocked_users_ids
     # to that user and redirect them to the homepage or list items page.
     if current_blocked_users[0] == None and blocked_user_id != current_user_id:
         db.execute("update users set blocked_user_ids = ? where id=?", [str(blocked_user_id), session["user_id"]])
 
+        # before redirecting the user, we have to check if the other user's
+        # blocked_by list and ensure that the current user's id is added to the
+        # other user's blocked by column
         if (blocked_by == None or blocked_by[0] == None):
             db.execute("update users set blocked_by = ? where id=?", [session["user_id"], str(blocked_user_id)])
         elif str(session["user_id"]) not in blocked_by[0]:
             placeholder2 = blocked_by[0] + ', ' + str(session["user_id"])
             db.execute("update users set blocked_by = ? where id=?", [placeholder2, blocked_user_id])
 
+        # commit changes and redirect
         db.commit()
         return redirect(url_for('list_items'))
 
@@ -462,21 +469,23 @@ def blocked_users():
     # blocked_user_ids to contain the newly blocked user
     elif str(blocked_user_id) not in current_blocked_users[0] and  blocked_user_id != current_user_id:
 
+        # copy and paste of the code from above but for this case.
         if (blocked_by == None or blocked_by[0] == None):
             db.execute("update users set blocked_by = ? where id=?", [session["user_id"], str(blocked_user_id)])
         elif str(session["user_id"]) not in blocked_by[0]:
             placeholder2 = blocked_by[0] + ', ' + str(session["user_id"])
             db.execute("update users set blocked_by = ? where id=?", [placeholder2, blocked_user_id])
 
+        # updating the blocked user ids column for the current user to include
+        # the newly blocked user
         placeholder = current_blocked_users[0] + ', ' + str(blocked_user_id)
         db.execute("update users set blocked_user_ids = ? where id=?", [placeholder, session["user_id"]])
+
+        # commiting changes, signaling to the user that they successfully
+        # blocked a user, then redirecting to the list_items page
         db.commit()
         flash(f"{blocked_user} is now blocked!", "danger")
         return redirect(url_for('list_items'))
-
-
-
-
 
 
 @app.route("/blocked_users_list")
@@ -520,15 +529,21 @@ def unblock_user():
     placeholder = ", ".join(blocked_users)
     db.execute("Update users set blocked_user_ids = ? where id = ?", [placeholder, session["user_id"]])
 
-
+    # when a user is unblocked by the current user, we have to remove the
+    # current users id from the block_by column of the blocked user. So we
+    # query the db and get the blocked_by list from the unblocked user and
+    # remove the current user's id from that list.
     blocked_by = db.execute("Select blocked_by from users where id = ?", [unblocked_user]).fetchone()
     blocked_by = blocked_by[0].split(", ")
-    print(blocked_by)
     blocked_by.remove(str(session["user_id"]))
 
-    placeholder = ", ".join(blocked_by)
-    db.execute("Update users set blocked_by = ? where id = ?", [placeholder, unblocked_user])
+    # rebuilding our placeholder with the new list
+    # and updating the blocked_by column of the unblocked user
+    # to the new list without the current user's id
+    placeholder2 = ", ".join(blocked_by)
+    db.execute("Update users set blocked_by = ? where id = ?", [placeholder2, unblocked_user])
     db.commit()
+
     # return them to the same page which is the list
     # of users that are currently blocked.
     flash(f"{session["username"]} is now unblocked. You can now see their post.", "success")
