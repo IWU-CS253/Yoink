@@ -2,6 +2,8 @@ import os
 import sqlite3
 import yagmail
 import random
+from functools import wraps
+from datetime import datetime, timedelta
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
 
@@ -54,9 +56,51 @@ def init_db_command():
     init_db()
     print("Initialized the database.")
 
+
+# Decorator for allowing only a certain amount of requests per interval per ip address
+def rate_limit_by_user(max_calls: int, interval: int):
+
+    # Create request history inside the decorator, so every endpoint has its own limits
+    request_history: dict[str, list[datetime]] = {}
+    def inner_rate_limit_decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+
+            user_id = session["user_id"]
+
+            if not user_id:
+                return "Abort.", 429
+
+            # Find cutoff time first
+            now = datetime.now()
+            cutoff_time = now - timedelta(seconds=interval)
+
+            # Update calls by eliminating those before the cutoff time
+            calls = request_history.get(user_id, [])
+            new_calls = []
+
+            for call_timestamp in calls:
+                # Allow only those requests where the timestamp is above the cutoff time
+                if call_timestamp >= cutoff_time:
+                    new_calls.append(call_timestamp)
+
+
+            if len(new_calls) >= max_calls:
+                flash("Too many requests. Wait a few seconds then try again.")
+                # Not a big fan of redirecting users to the main page, but it's enough for this project
+                return redirect(url_for("index"))
+
+            # Add current timestamp to the call history
+            new_calls.append(now)
+            request_history[user_id] = new_calls
+
+            return f(*args, **kwargs)
+        
+        return wrapper
+    return inner_rate_limit_decorator
+
 @app.route('/send-otp', methods=["POST"])
 def send_otp():
-    print("form: ", request.form)
     username = request.form.get("username", "").strip()
     email = request.form.get("email", "").strip()
     password = request.form.get("password", "").strip()
@@ -120,7 +164,6 @@ def register():
         db = get_db()
 
         db.execute("INSERT INTO otp (code, email) VALUES (?, ?)", [otp_code, email])
-
         db.commit()
 
         yag.send(email, "Yoink: Requested OTP Code", f"Your OTP code is: {otp_code}")
