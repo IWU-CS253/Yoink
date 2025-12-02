@@ -3,6 +3,7 @@ import sqlite3
 import yagmail
 import random
 from functools import wraps
+from datetime import datetime, timedelta
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
 
@@ -54,6 +55,91 @@ def init_db_command():
     init_db()
     print("Initialized the database.")
 
+
+# Decorator for allowing only a certain amount of requests per interval per ip address
+def rate_limit_by_user(max_calls: int, interval: int):
+
+    # Create request history inside the decorator, so every endpoint has its own limits
+    request_history: dict[str, list[datetime]] = {}
+    def inner_rate_limit_decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+
+            # Early return for GET requests
+            if request.method == "GET":
+                return f(*args, **kwargs)
+
+            user_id = session["user_id"]
+
+            if not user_id:
+                return "Abort.", 429
+
+            # Find cutoff time first
+            now = datetime.now()
+            cutoff_time = now - timedelta(seconds=interval)
+
+            # Update calls by eliminating those before the cutoff time
+            calls = request_history.get(user_id, [])
+            new_calls = []
+
+            for call_timestamp in calls:
+                # Allow only those requests where the timestamp is above the cutoff time
+                if call_timestamp >= cutoff_time:
+                    new_calls.append(call_timestamp)
+
+
+            if len(new_calls) >= max_calls:
+                flash("Too many requests. Wait a few seconds then try again.")
+                # Not a big fan of redirecting users to the main page, but it's enough for this project
+                return redirect(url_for("index"))
+
+            # Add current timestamp to the call history
+            new_calls.append(now)
+            request_history[user_id] = new_calls
+
+            return f(*args, **kwargs)
+        
+        return wrapper
+    return inner_rate_limit_decorator
+
+# Decorator for allowing only a certain number of requests per interval per identifier (email in our case)
+def rate_limit_by_identifier(max_calls: int, interval: int):
+    request_history: dict[str, list[datetime]] = {}
+    def rate_limit_decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+
+            # Early return for GET requests
+            if request.method == "GET":
+                return f(*args, **kwargs)
+            
+            identifier = request.form.get("email")
+
+            if not identifier:
+                return "Abort.", 429
+            
+            now = datetime.now()
+            cutoff_time = now - timedelta(seconds=interval)
+            
+            calls = request_history.get(identifier, [])
+            new_calls = []
+
+            for call_timestamp in calls:
+                if call_timestamp > cutoff_time:
+                    new_calls.append(call_timestamp)
+
+            if len(new_calls) >= max_calls:
+                print("Too many requests for identifier: ", identifier)
+                flash("Too many requests.", "warning")
+                return redirect(url_for("index"))
+
+            new_calls.append(now)
+            request_history[identifier] = new_calls
+
+            return f(*args, **kwargs)
+        
+        return wrapper
+    return rate_limit_decorator
 # Login required decorator, to avoid non-browser requests from spamming api requests
 def login_required(f):
     @wraps(f)
@@ -80,7 +166,6 @@ def owns_resource(f):
 
 @app.route('/send-otp', methods=["POST"])
 def send_otp():
-    print("form: ", request.form)
     username = request.form.get("username", "").strip()
     email = request.form.get("email", "").strip()
     password = request.form.get("password", "").strip()
@@ -125,6 +210,8 @@ def send_otp():
         return redirect(url_for("register"))
 
 @app.route("/register", methods=["GET", "POST"])
+# Rate limit by identifier - 3 requests every 5 minutes
+@rate_limit_by_identifier(10, 300)
 def register():
     if request.method == "POST":
         username = request.form.get("username", "").strip()  # fetches the fields and returns "" if missing
@@ -144,7 +231,6 @@ def register():
         db = get_db()
 
         db.execute("INSERT INTO otp (code, email) VALUES (?, ?)", [otp_code, email])
-
         db.commit()
 
         yag.send(email, "Yoink: Requested OTP Code", f"Your OTP code is: {otp_code}")
@@ -262,6 +348,7 @@ def item_detail(item_id: int):
 
 
 @app.route("/items/new", methods=["GET", "POST"])
+@rate_limit_by_user(30, 60 * 60 * 24) #Allow users to post 30 times per day
 @login_required
 def create_item():
     """Adds a post to the website"""
@@ -314,6 +401,7 @@ def create_item():
 
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
+@rate_limit_by_user(3, 60) # Allow users to edit items three times every minute
 @login_required
 @owns_resource
 def edit_item(item_id: int):
