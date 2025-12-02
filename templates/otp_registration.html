@@ -3,7 +3,7 @@
 <div style="display: flex; gap: 2rem; align-items: center; min-height: 60vh">
   <div class="card" style="flex: 1; max-width: 500px">
     <h2 style="margin-top: 0">Create your account</h2>
-    <form method="post" action="{{ url_for('send_otp') }}">
+    <form method="post" action="{{ url_for('auth.send_otp') }}">
       <label for="email">School email *</label>
       <input
         id="email"
@@ -35,7 +35,7 @@
 
       <div style="margin-top: 1rem">
         <button class="btn primary" type="submit">Register</button>
-        <a class="btn" href="{{ url_for('login') }}"
+        <a class="btn" href="{{ url_for('auth.login') }}"
           >Already have an account?</a
         >
       </div>
