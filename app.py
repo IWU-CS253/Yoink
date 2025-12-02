@@ -66,6 +66,10 @@ def rate_limit_by_user(max_calls: int, interval: int):
         @wraps(f)
         def wrapper(*args, **kwargs):
 
+            # Early return for GET requests
+            if request.method == "GET":
+                return f(*args, **kwargs)
+
             user_id = session["user_id"]
 
             if not user_id:
@@ -106,8 +110,8 @@ def rate_limit_by_identifier(max_calls: int, interval: int):
         @wraps(f)
         def wrapper(*args, **kwargs):
 
+            # Early return for GET requests
             if request.method == "GET":
-                print("method is get so just go right through")
                 return f(*args, **kwargs)
             
             identifier = request.form.get("email")
@@ -324,13 +328,9 @@ def item_detail(item_id: int):
 
 
 @app.route("/items/new", methods=["GET", "POST"])
+@rate_limit_by_user(30, 60 * 60 * 24) #Allow users to post 30 times per day
 def create_item():
     """Adds a post to the website"""
-
-    # asks the user log in, in order to be able to post
-    if "user_id" not in session:
-        flash("Please log in to post an item.", "warning")
-        return redirect(url_for("login", next=request.url))
     
     # takes away the whitespace, and adds all the information to the database
     if request.method == "POST":
@@ -380,6 +380,7 @@ def create_item():
 
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
+@rate_limit_by_user(3, 60) # Allow users to edit items three times every minute
 def edit_item(item_id: int):
     """Allows the user to only edit in their own posts"""
     db = get_db()
