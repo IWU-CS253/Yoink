@@ -5,6 +5,8 @@ Steps:
 1. Run
 `pip install -r "requirements.txt"`
 
-2. Ensure you have a `.env` file with the needed environment variables from `.env.example`
+2. Run `flask initdb`
 
-3. Run `python3 app.py`
+3. Ensure you have a `.env` file with the needed environment variables from `.env.example`
+
+4. Run `python3 app.py`
