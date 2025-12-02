@@ -99,6 +99,45 @@ def rate_limit_by_user(max_calls: int, interval: int):
         return wrapper
     return inner_rate_limit_decorator
 
+# Decorator for allowing only a certain number of requests per interval per identifier (email in our case)
+def rate_limit_by_identifier(max_calls: int, interval: int):
+    request_history: dict[str, list[datetime]] = {}
+    def rate_limit_decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+
+            if request.method == "GET":
+                print("method is get so just go right through")
+                return f(*args, **kwargs)
+            
+            identifier = request.form.get("email")
+
+            if not identifier:
+                return "Abort.", 429
+            
+            now = datetime.now()
+            cutoff_time = now - timedelta(seconds=interval)
+            
+            calls = request_history.get(identifier, [])
+            new_calls = []
+
+            for call_timestamp in calls:
+                if call_timestamp > cutoff_time:
+                    new_calls.append(call_timestamp)
+
+            if len(new_calls) >= max_calls:
+                print("Too many requests for identifier: ", identifier)
+                flash("Too many requests.", "warning")
+                return redirect(url_for("index"))
+
+            new_calls.append(now)
+            request_history[identifier] = new_calls
+
+            return f(*args, **kwargs)
+        
+        return wrapper
+    return rate_limit_decorator
+
 @app.route('/send-otp', methods=["POST"])
 def send_otp():
     username = request.form.get("username", "").strip()
@@ -145,6 +184,8 @@ def send_otp():
         return redirect(url_for("register"))
 
 @app.route("/register", methods=["GET", "POST"])
+# Rate limit by identifier - 3 requests every 5 minutes
+@rate_limit_by_identifier(3, 300)
 def register():
     if request.method == "POST":
         username = request.form.get("username", "").strip()  # fetches the fields and returns "" if missing
