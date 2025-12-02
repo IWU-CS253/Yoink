@@ -2,6 +2,7 @@ import os
 import sqlite3
 import yagmail
 import random
+from functools import wraps
 from flask import Flask, g, render_template, request, redirect, url_for, flash, session
 from dotenv import load_dotenv
 
@@ -39,7 +40,6 @@ def close_db(error):
     if db is not None:
         db.close()  # closes the sqlite connection
 
-
 # initializes the DB from schema
 def init_db():
     db = get_db()
@@ -48,11 +48,35 @@ def init_db():
     db.commit()
 
 
-@app.cli.command("init-db")
+@app.cli.command("initdb")
 def init_db_command():
     """Creates the database table."""
     init_db()
     print("Initialized the database.")
+
+# Login required decorator, to avoid non-browser requests from spamming api requests
+def login_required(f):
+    @wraps(f)
+    def login_required_decorator(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        
+        return f(*args, **kwargs)
+    return login_required_decorator
+
+# Authorization required decorator, to avoid bad actors from deleting people's posts
+def owns_resource(f):
+    @wraps(f)
+    def owns_resource_decorator(item_id: int):
+        db = get_db()
+        rows = db.execute("SELECT items.id FROM items WHERE items.owner_id = ? AND items.id = ?", [session["user_id"], item_id])
+
+        if len(list(rows)) == 0:
+            flash("Unauthorized (Kyle please stop it 😭).", "warning")
+            return redirect(url_for("index"))
+
+        return f(item_id)
+    return owns_resource_decorator
 
 @app.route('/send-otp', methods=["POST"])
 def send_otp():
@@ -186,13 +210,10 @@ def index():
 
 
 @app.get("/items")
+@login_required
 def list_items():
     """Lists all the items in the database"""
     db = get_db()
-
-    # redirects the user to the login page if logged out
-    if "user_id" not in session:
-        return redirect(url_for("login"))
 
     # otherwise we get all of the currently blocked users, split them into a list
     # and add the current users id to that list
@@ -224,6 +245,7 @@ def list_items():
 
 
 @app.get("/items/<int:item_id>")
+@login_required
 def item_detail(item_id: int):
     """Returns the item details from database"""
     db = get_db()
@@ -240,13 +262,9 @@ def item_detail(item_id: int):
 
 
 @app.route("/items/new", methods=["GET", "POST"])
+@login_required
 def create_item():
     """Adds a post to the website"""
-
-    # asks the user log in, in order to be able to post
-    if "user_id" not in session:
-        flash("Please log in to post an item.", "warning")
-        return redirect(url_for("login", next=request.url))
     
     # takes away the whitespace, and adds all the information to the database
     if request.method == "POST":
@@ -296,6 +314,8 @@ def create_item():
 
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
+@login_required
+@owns_resource
 def edit_item(item_id: int):
     """Allows the user to only edit in their own posts"""
     db = get_db()
@@ -356,6 +376,8 @@ def edit_item(item_id: int):
 
 
 @app.route("/items/<int:item_id>/delete", methods=['POST'])
+@login_required
+@owns_resource
 def delete_item(item_id: int):
     """Takes the id of the post, then deletes that post"""
     db = get_db()
@@ -371,6 +393,7 @@ def delete_item(item_id: int):
 
 
 @app.route("/user_profile ", methods=["GET", "POST"])
+@login_required
 def user_profile():
     """Displays a users profile so users can interact with one another"""
     user_name = request.form["profile_username"]
@@ -382,6 +405,7 @@ def user_profile():
     return(render_template("user_profile.html", user_name=user_name, items=items))
 
 @app.route("/my-items", methods=["GET"])
+@login_required
 def my_items():
     """Shows the users only their post"""
     db = get_db()
@@ -405,7 +429,8 @@ def search():
         sorted_items = db.execute('SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY items.created_at DESC', [search_term]).fetchall()
 
     return render_template("items_list.html", items=sorted_items)
-@app.route("/blocked_users", methods=[ "GET"] )
+@app.route("/blocked_users", methods=["GET"])
+@login_required
 def blocked_users():
     """Allows users to block other users."""
 
@@ -441,6 +466,7 @@ def blocked_users():
     return redirect(url_for('list_items'))
 
 @app.route("/blocked_users_list")
+@login_required
 def blocked_users_list():
     """Lists all the users that the current user has blocked."""
 
@@ -459,6 +485,7 @@ def blocked_users_list():
     return(render_template("blocked_users_list.html", blocked_users_list= blocked_usernames))
 
 @app.route("/unblock_user")
+@login_required
 def unblock_user():
     """Allows users to unblock users."""
 
