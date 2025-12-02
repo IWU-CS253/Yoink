@@ -211,7 +211,7 @@ def send_otp():
 
 @app.route("/register", methods=["GET", "POST"])
 # Rate limit by identifier - 3 requests every 5 minutes
-@rate_limit_by_identifier(3, 300)
+@rate_limit_by_identifier(10, 300)
 def register():
     if request.method == "POST":
         username = request.form.get("username", "").strip()  # fetches the fields and returns "" if missing
