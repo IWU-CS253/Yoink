@@ -265,6 +265,8 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(items_bp)
 app.register_blueprint(users_bp)
 
+# checks the existence of the upload directory
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
         image_path = None
         # uploads the image, if image was provided
         try:
