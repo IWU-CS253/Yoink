@@ -404,8 +404,10 @@ def search():
     question_mark_holder = ''
 
     for i in current_blocked_users:
-        if i != '':
+        if current_blocked_users:
             question_mark_holder += '?,'
+        else:
+            question_mark_holder = '?,'
 
     # base case: where the user wants to go back to every post
     if request.form['title'] == '':
