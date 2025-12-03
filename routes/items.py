@@ -197,13 +197,39 @@ def search():
     """Searches for specific items"""
     db = get_db()
     search_term = f"%{request.form['title']}%"
-    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",[session["user_id"]]).fetchone()
+    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",
+                                       [session["user_id"]]).fetchone()
+    if current_blocked_users[0] is not None and current_blocked_users is not None:
+        current_blocked_users = current_blocked_users[0].strip().split(',')
+    else:
+        current_blocked_users = []
+
+    question_mark_holder = ''
+
+    for i in current_blocked_users:
+        if current_blocked_users:
+            question_mark_holder += '?,'
+        else:
+            question_mark_holder = '?,'
 
     # base case: where the user wants to go back to every post
     if request.form['title'] == '':
-        sorted_items = db.execute(f'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id Where owner_id not in () ORDER BY created_at DESC')
+        if not current_blocked_users:
+            sorted_items = db.execute(
+                'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id ORDER BY created_at DESC').fetchall()
+        else:
+            sorted_items = db.execute(
+                f'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id Where owner_id not in ({question_mark_holder[:-1]}) ORDER BY created_at DESC',
+                current_blocked_users)
     else:
         # if not empty, it will show the item based on the characters they use for the search
-        sorted_items = db.execute('SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY items.created_at DESC', [search_term]).fetchall()
+        if not current_blocked_users:
+            sorted_items = db.execute(
+                'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY items.created_at DESC',
+                [search_term]).fetchall()
+        else:
+            sorted_items = db.execute(
+                f'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) and owner_id not in ({question_mark_holder[:-1]}) ORDER BY items.created_at DESC',
+                [search_term] + current_blocked_users).fetchall()
 
     return render_template("items_list.html", items=sorted_items)
