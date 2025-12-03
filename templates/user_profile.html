@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+{%  block body %}
+<!--User profile page-->
+<style>
+   .container{
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   }
+   .btn-danger{
+   background-color: red;
+   color: white;
+   border-color: white;
+   }
+</style>
+    <script>
+
+        let username = "{{ user_name }}"
+        function confirmDelete() {
+            return alert("You are blocking " + username )
+    }
+    </script>
+<div class="container">
+   <img class="user_photo" src="https://picsum.photos/200/300">
+   <h5 class="card-title">     @{{ user_name }}</h5>
+   <form action="{{ url_for('users.blocked_users') }}"> <button onclick="confirmDelete()" id="blocked_user_form" name="blocked_user" class="btn btn-danger" value="{{ user_name }}">Block @{{ user_name }}</button> </form>
+</div>
+{% for it in items %}
+<ol>
+   <article class="card" style="display: flex; gap: 1rem">
+      {% if it.image_path %}
+      <img
+         src="{{ url_for('static', filename=it.image_path) }}"
+         alt="{{ it.title }}"
+         style="
+         width: 120px;
+         height: 120px;
+         object-fit: cover;
+         border-radius: 8px;
+         border: 1px solid #ddd;
+         "
+         />
+      {% endif %}
+      <div>
+      <div style="flex: 1">
+         <h3 style="margin: 0.2rem 0">
+            <a href="{{ url_for('items.item_detail', item_id=it.id) }}"
+               >{{ it.title }}</a
+               >
+         </h3>
+         <p style="margin: 0.2rem 0; color: #555">
+            {{ it.description[:160] }}{% if it.description|length > 160 %}…{%
+            endif %}
+         </p>
+         <p style="margin: 0.2rem 0; color: #777; font-size: 0.9rem">
+            {% if it.category %}#{{ it.category }} · {% endif %} {% if
+            it.condition %}Condition: {{ it.condition }} · {% endif %}{{ it.created_at }}
+         </p>
+      </div>
+   </article>
+</ol>
+{% endfor %}
+{% endblock %}
+
+
+
+
