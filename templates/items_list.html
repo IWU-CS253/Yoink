@@ -14,14 +14,14 @@
         <h2 style="margin: 0;">Latest posts</h2>
         <!--The search bar-->
         <div>
-            <form action="{{ url_for('search')}}" method="post">
-            <input style="height: 2.7rem; border-radius:8px; width: 50%; box-sizing: border-box; border:1px solid #0b6; color:#0b6;" type="text" placeholder="Search..." name="title" value="{{ items.title }}">
+            <form action="{{ url_for('items.search')}}" method="post">
+            <input style="height: 2.7rem; border-radius:8px; width: 50%; box-sizing: border-box; border:1px solid #0b6; color:#0b6;" type="text" placeholder="Item..." name="title" value="{{ items.title }}">
             <button  type="submit" class="btn btn-primary">Search</button>
             </form>
         </div>
         <!--Post button-->
         {% if session.get('user_id') %}
-            <a class="btn primary" href="{{ url_for('create_item') }}">+ Post an item</a>
+            <a class="btn primary" href="{{ url_for('items.create_item') }}">+ Post an item</a>
         {% endif %}
     </div>
 
@@ -41,7 +41,7 @@
 
         <div style="padding: 1rem; flex:1; display: flex; flex-direction: column;">
             <h3 style="margin:0 0 0.5rem 0;">
-                <a href="{{ url_for('item_detail', item_id=it.id) }}">{{ it.title }}</a>
+                <a href="{{ url_for('items.item_detail', item_id=it.id) }}">{{ it.title }}</a>
             </h3>
 
             <p style="margin:0 0 0.5rem 0; color:#555; flex: 1">
@@ -60,7 +60,7 @@
 
                 <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 0.8rem">
                     Posted by
-                    <form method="post" action="{{ url_for('user_profile') }}" style="display: inline;">
+                    <form method="post" action="{{ url_for('users.user_profile') }}" style="display: inline;">
                         <input type="hidden" name="profile_username" value="{{ it.username }}">
                         <button style="background: none; border: none; padding: 0; color: #00bb66" type="submit">{{ it.username }}</button>
                     </form>
@@ -71,7 +71,7 @@
     </article>
     {% else %}
     <div class="card" style="grid-column-start: 1; grid-column-end: -1">
-        No items yet. Be the first to <a href="{{ url_for('create_item') }}">post</a>!
+        No items yet. Be the first to <a href="{{ url_for('items.create_item') }}">post</a>!
     </div>
   {% endfor %}
 </div>

@@ -1,15 +1,9 @@
 import os
 import sqlite3
-import yagmail
-import random
-from flask import Flask, g, render_template, request, redirect, url_for, flash, session
-from dotenv import load_dotenv
+from flask import Flask, g
+from utils import BASE_DIR, get_db
 
 app = Flask(__name__)  # creates the flask app object
-
-load_dotenv()
-
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # gets the absolute path to the folder
 
 app.config.update(
     SECRET_KEY=os.environ.get("SECRET_KEY", "dev-secret-change-me"),  # signs sessions
@@ -19,26 +13,11 @@ app.config.update(
     ALLOWED_EXTENSIONS={"png", "jpg", "jpeg", "gif", "webp", "heic"},  # allowed img extensions (need to add heic file as mostly people use iphone)
 )
 
-# checks the existence of the upload directory
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-
-# Client for sending emails
-yag = yagmail.SMTP(os.environ.get("EMAIL_USERNAME", ""), os.environ.get("EMAIL_PASSWORD", ""))
-
-def get_db():
-    if "db" not in g: # one connection per request
-        rv = sqlite3.connect(app.config["DATABASE"])
-        rv.row_factory = sqlite3.Row
-        g.db = rv
-    return g.db
-
-
 @app.teardown_appcontext  # runs at the end of the application context
 def close_db(error):
     db = g.pop("db", None)
     if db is not None:
         db.close()  # closes the sqlite connection
-
 
 # initializes the DB from schema
 def init_db():
@@ -47,8 +26,7 @@ def init_db():
         db.executescript(f.read())
     db.commit()
 
-
-@app.cli.command("init-db")
+@app.cli.command("initdb")
 def init_db_command():
     """Creates the database table."""
     init_db()
@@ -282,14 +260,10 @@ def create_item():
         contact = request.form.get("contact", "").strip()
         image = request.files.get("image")
 
-        # checks to make sure the user puts in the required data
-        errors = []
-        if not title:
-            errors.append("Title is required.")
-        if not description:
-            errors.append("Description is required.")
-        if not contact:
-            errors.append("Contact is required.")
+# Register blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(items_bp)
+app.register_blueprint(users_bp)
 
         image_path = None
         # uploads the image, if image was provided

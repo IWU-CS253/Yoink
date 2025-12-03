@@ -1,123 +1,168 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Yoink</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/modern-css-reset/dist/reset.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/modern-css-reset/dist/reset.min.css"
+    />
     <style>
-        html, body {
-            height: 100%;
-        }
-        body {
-            font-family: Arial, sans-serif, "Times New Roman";
-            margin: 0;
-            background: #f7f7f9;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        header, footer {
-            background: #0b6;
-            color: #fff;
-            padding: 0.75rem 1rem;
-        }
-        main {
-            max-width: 880px;
-            margin: 1rem auto;
-            padding: 0 1rem;
-            flex: 1;
-            width: 100%;
-        }
-        footer {
-            margin-top: auto;
-            display: flex;
-            justify-content: center;
-        }
-        .user_photo{
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        font-family: Arial, sans-serif, "Times New Roman";
+        margin: 0;
+        background: #f7f7f9;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      header,
+      footer {
+        background: #0b6;
+        color: #fff;
+        padding: 0.75rem 1rem;
+      }
+      main {
+        max-width: 880px;
+        margin: 1rem auto;
+        padding: 0 1rem;
+        flex: 1;
+        width: 100%;
+      }
+      footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: center;
+      }
+      .user_photo {
         height: 120px;
-            width: 120px;
-            border-radius: 50%;
-        }
-        nav a { color:#fff; margin-right: 1rem; text-decoration: none; }
-        nav a:hover{color: lightgrey;}
-
-        .card { background:#fff; border:1px solid #e5e5e5; border-radius:12px; padding:1rem; margin-bottom:1rem; }
-        .btn { display:inline-block; padding:.5rem .75rem; border-radius:8px; text-decoration:none; border:1px solid #0b6; color:#0b6; background:#fff; }
-        .btn.primary { background:#0b6; color:#fff; border-color:#0b6; }
-        .flash { padding:.5rem .75rem; border-radius:8px; margin:.5rem 0; }
-        .flash.info { background:#e8f4ff; }
-        .flash.success { background:#e6fbe9; }
-        .flash.warning { background:#fff8e1; }
-        .flash.danger { background:#ffe8e8; }
-        form .row { display:flex; gap:1rem; }
-        form .row > * { flex:1; }
-        label { display:block; font-weight:600; margin-top: .5rem; }
-        input[type=text], input[type=email], input[type=password], textarea, select {
-        width:100%; padding:.5rem .6rem; border-radius:8px; border:1px solid #ccc; background:#fff; box-sizing: border-box;
-        }
-        textarea { min-height: 120px; }
-
+        width: 120px;
+        border-radius: 50%;
+      }
+      nav a {
+        color: #fff;
+        margin-right: 1rem;
+        text-decoration: none;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      .btn {
+        display: inline-block;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        text-decoration: none;
+        border: 1px solid #0b6;
+        color: #0b6;
+        background: #fff;
+      }
+      .btn.primary {
+        background: #0b6;
+        color: #fff;
+        border-color: #0b6;
+      }
+      .flash {
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+      }
+      .flash.info {
+        background: #e8f4ff;
+      }
+      .flash.success {
+        background: #e6fbe9;
+      }
+      .flash.warning {
+        background: #fff8e1;
+      }
+      .flash.danger {
+        background: #ffe8e8;
+      }
+      form .row {
+        display: flex;
+        gap: 1rem;
+      }
+      form .row > * {
+        flex: 1;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-top: 0.5rem;
+      }
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      textarea,
+      select {
+        width: 100%;
+        padding: 0.5rem 0.6rem;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        background: #fff;
+        box-sizing: border-box;
+      }
+      textarea {
+        min-height: 120px;
+      }
     </style>
-    <script>
-        function locc() {
-            let tab = window.location
-            let nav_bar = document.getElementById("nav")
-            for link in nav_bar{
-                if tab == link{
-
-                }
-            }
-
-
-        }
-    </script>
-</head>
-<body>
-<!--Very top of the page-->
-<header>
-    <nav id="nav">
+  </head>
+  <body>
+    <!--Very top of the page-->
+    <header>
+      <nav>
         <!--Home link-->
-        <a onclick="locc()" id="home" href="{{ url_for('list_items') }}">Home</a>
-        {%  if session.get('user_id') %}
-            <!--Post item link-->
-            <a id="post-items" href="{{ url_for('create_item') }}">Post Item</a>
-            <!--User's item page link-->
-            <a id="my-items" href="{{ url_for('my_items') }}">My items</a>
-            <!--User's blocked users page link-->
-            <a id="blocked-users" href="{{ url_for('blocked_users_list') }}">Blocked Users</a>
-            <!--logout user button-->
-            <form action="{{ url_for('logout') }}" method="post" style="display: inline">
-                <button class="btn" style="margin-left: 1rem">Log out ({{ session['username'] }})</button>
-            </form>
+        <a href="{{ url_for('items.list_items') }}">Home</a>
+        {% if session.get('user_id') %}
+        <!--Post item link-->
+        <a href="{{ url_for('items.create_item') }}">Post Item</a>
+        <!--User's item page link-->
+        <a href="{{ url_for('users.my_items') }}">My items</a>
+        <!--User's blocked users page link-->
+        <a href="{{ url_for('users.blocked_users_list') }}">Blocked Users</a>
+        <!--logout user button-->
+        <form
+          action="{{ url_for('auth.logout') }}"
+          method="post"
+          style="display: inline"
+        >
+          <button class="btn" style="margin-left: 1rem">
+            Log out ({{ session['username'] }})
+          </button>
+        </form>
         {% else %}
-            <!--Links to the registar and log in page-->
-            <a href="{{ url_for('login') }}">Log in</a>
-            <a href="{{ url_for('register') }}">Register</a>
+        <!--Links to the registar and log in page-->
+        <a href="{{ url_for('auth.login') }}">Log in</a>
+        <a href="{{ url_for('auth.register') }}">Register</a>
         {% endif %}
-    </nav>
-</header>
+      </nav>
+    </header>
 
-<main>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, msg in messages %}
-        <div class="flash {{ category }}">{{ msg }}</div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+    <main>
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, msg in messages %}
+      <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %} {% endif %} {% endwith %} {% block body %} {% if content %}
+      <div class="card">{{ content|safe }}</div>
+      {% endif %} {% endblock %}
+    </main>
 
-  {% block body %}
-    {% if content %}<div class="card">{{ content|safe }}</div>{% endif %}
-  {% endblock %}
-</main>
-
-<!--Copyright-->
-<footer>
-  <small>&copy; {{ 2025 }} Yoink</small>
-</footer>
-
-</body>
+    <!--Copyright-->
+    <footer>
+      <small>&copy; {{ 2025 }} Yoink</small>
+    </footer>
+  </body>
 </html>
