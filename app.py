@@ -265,13 +265,15 @@ def create_item():
         contact = request.form.get("contact", "").strip()
         image = request.files.get("image")
 
-# Register blueprints
-app.register_blueprint(auth_bp)
-app.register_blueprint(items_bp)
-app.register_blueprint(users_bp)
+        # checks to make sure the user puts in the required data
+        errors = []
+        if not title:
+            errors.append("Title is required.")
+        if not description:
+            errors.append("Description is required.")
+        if not contact:
+            errors.append("Contact is required.")
 
-# checks the existence of the upload directory
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
         image_path = None
         # uploads the image, if image was provided
         try:
@@ -298,6 +300,40 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
         return redirect(url_for("list_items"))
 
     return render_template("items_new.html", username=session.get("username"))
+
+# Register blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(items_bp)
+app.register_blueprint(users_bp)
+
+# checks the existence of the upload directory
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+    image_path = None
+    # uploads the image, if image was provided
+    try:
+        if image and image.filename:
+            image_path = save_image(image)
+    except ValueError as e:
+        errors.append(str(e))
+
+    # if there are any errors, it'll flash red what the error is to the user
+    if errors:
+        for e in errors: flash(e, "danger")
+        return render_template("items_new.html",
+                               form=request.form,
+                               username=session.get("username"))
+    db = get_db()
+    db.execute("""
+        INSERT INTO items (owner_id, title, description, category, condition, location, contact, image_path)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (session["user_id"], title, description, category, condition, location, contact, image_path))
+    db.commit()
+
+    # if no errors, the post will be added to the items_list page
+    flash("Item posted!", "success")
+    return redirect(url_for("list_items"))
+
+   
 
 
 @app.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
