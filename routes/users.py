@@ -145,7 +145,8 @@ def unblock_user():
 
     # return them to the same page which is the list
     # of users that are currently blocked.
-    flash(f"{session["username"]} is now unblocked. You can now see their post.", "success")
+    username=session["username"]
+    flash(f"{username} is now unblocked. You can now see their post.", "success")
     return (redirect(url_for('users.blocked_users_list')))
 
 def placeholder_helper(ls):
