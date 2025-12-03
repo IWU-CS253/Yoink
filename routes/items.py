@@ -60,8 +60,8 @@ def item_detail(item_id: int):
 
 
 @items_bp.route("/items/new", methods=["GET", "POST"])
-@rate_limit_by_user(30, 60 * 60 * 24)
 @login_required
+@rate_limit_by_user(30, 60 * 60 * 24)
 def create_item():
     """Adds a post to the website"""
 
@@ -113,8 +113,8 @@ def create_item():
 
 
 @items_bp.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
-@rate_limit_by_user(3, 60)
 @login_required
+@rate_limit_by_user(3, 60)
 @owns_resource
 def edit_item(item_id: int):
     """Allows the user to only edit in their own posts"""
