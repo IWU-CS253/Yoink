@@ -160,26 +160,26 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.search('desk')
         assert b'desk' not in rv.data
     
-    # def test_unblock_user(self):
-    #     self.complete_registration('admin', 'admin@iwu.edu', 'default')
-    #     self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
+    def test_unblock_user(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
 
-    #     self.login('admin2', 'default')
-    #     self.create_item('desk', 'a nick desk', 'Other',
-    #                      'Good', 'Magil', '123@iwu.edu', None)
-    #     self.logout()
+        self.login('admin2', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        self.logout()
 
-    #     self.login('admin', 'default')
+        self.login('admin', 'default')
 
-    #     self.block_user()
+        self.block_user()
 
-    #     rv = self.search('desk')
-    #     assert b'desk' not in rv.data
+        rv = self.search('desk')
+        assert b'desk' not in rv.data
 
-    #     self.unblock_user()
+        self.unblock_user()
     
-    #     rb = self.search('desk')
-    #     assert b'desk' in rb.data
+        rb = self.search('desk')
+        assert b'desk' in rb.data
 
 if __name__ == '__main__':
     unittest.main()
