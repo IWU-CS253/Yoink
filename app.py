@@ -3,6 +3,11 @@ import sqlite3
 from flask import Flask, g
 from utils import BASE_DIR, get_db
 
+# Import blueprints
+from routes.auth import auth_bp
+from routes.items import items_bp
+from routes.users import users_bp
+
 app = Flask(__name__)  # creates the flask app object
 
 app.config.update(
