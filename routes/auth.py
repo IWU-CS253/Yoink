@@ -3,6 +3,7 @@ import sqlite3
 import random
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from utils import get_db, rate_limit_by_identifier, yag, BASE_DIR
+from werkzeug.security import check_password_hash, generate_password_hash
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -38,11 +39,14 @@ def send_otp():
     db.execute("DELETE FROM otp WHERE email = ? AND code = ?", [email, otp])
     db.commit()
 
+    # Generate password hash, which will be stored in the database
+    hashed_password = generate_password_hash(password)
+
     # Only if all checks go through, register the user
     try:
         db.execute(
             "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-            (username, email, password),
+            (username, email, hashed_password),
         )
         db.commit()  # makes the changes permanent
         flash("Registered! You can log in now.", "success")
@@ -88,13 +92,18 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
+
         db = get_db()
+
         row = db.execute("SELECT id, username, password FROM users WHERE username = ?", (username,)).fetchone()
-        if row and row["password"] == password:
+
+        # Check that the hashes are the same to authenticate the user
+        if row and check_password_hash(row["password"], password):
             session["user_id"] = row["id"]
             session["username"] = row["username"]
             flash(f"Welcome, {row['username']}", "success")
             return redirect(request.args.get("next") or url_for("items.list_items"))
+        
         flash("Invalid username or password.", "danger")
     return render_template("login.html") if os.path.exists(
         os.path.join(BASE_DIR, "templates", "login.html")
