@@ -8,6 +8,7 @@
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Yoink</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='default-icon.png') }}">
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/modern-css-reset/dist/reset.min.css"
@@ -47,6 +48,15 @@
         height: 120px;
         width: 120px;
         border-radius: 50%;
+      }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      nav .nav-left, nav .nav-right {
+        display: flex;
+        align-items: center;
       }
       nav a {
         color: #fff;
@@ -124,30 +134,37 @@
     <!--Very top of the page-->
     <header>
       <nav>
-        <!--Home link-->
-        <a href="{{ url_for('items.list_items') }}">Home</a>
-        {% if session.get('user_id') %}
-        <!--Post item link-->
-        <a href="{{ url_for('items.create_item') }}">Post Item</a>
-        <!--User's item page link-->
-        <a href="{{ url_for('users.my_items') }}">My items</a>
-        <!--User's blocked users page link-->
-        <a href="{{ url_for('users.blocked_users_list') }}">Blocked Users</a>
-        <!--logout user button-->
-        <form
-          action="{{ url_for('auth.logout') }}"
-          method="post"
-          style="display: inline"
-        >
-          <button class="btn" style="margin-left: 1rem">
-            Log out ({{ session['username'] }})
-          </button>
-        </form>
-        {% else %}
-        <!--Links to the registar and log in page-->
-        <a href="{{ url_for('auth.login') }}">Log in</a>
-        <a href="{{ url_for('auth.register') }}">Register</a>
-        {% endif %}
+        <div class="nav-left">
+          <!--Home link-->
+          <a href="{{ url_for('items.list_items') }}">Home</a>
+          {% if session.get('user_id') %}
+          <!--Post item link-->
+          <a href="{{ url_for('items.create_item') }}">Post Item</a>
+          {% endif %}
+        </div>
+
+        <div class="nav-right">
+          {% if session.get('user_id') %}
+          <!--User's item page link-->
+          <a href="{{ url_for('users.my_items') }}">My Items</a>
+          <!--User's blocked users page link-->
+          <a href="{{ url_for('users.blocked_users_list') }}">Blocked Users</a>
+          <!--logout user button-->
+          <form
+            action="{{ url_for('auth.logout') }}"
+            method="post"
+            style="display: inline"
+          >
+            <button class="btn" style="margin-left: 1rem">
+              Log out ({{ session['username'] }})
+            </button>
+          </form>
+          {% else %}
+          <!--Links to the registar and log in page-->
+          <a href="{{ url_for('auth.login') }}">Log in</a>
+          <a href="{{ url_for('auth.register') }}">Register</a>
+          {% endif %}
+        </div>
       </nav>
     </header>
 

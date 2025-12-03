@@ -34,7 +34,9 @@
             <img src="{{ url_for('static', filename=it.image_path) }}" alt="{{ it.title }}"
                  style="width:100%; height:250px; object-fit:cover;">
         {% else %}
-            <div style="width: 100%; height: 250px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999;">
+            <img src="{{ url_for('static', filename='default-item.png') }}" alt="No image"
+                style="width:100%; height:250px; object-fit:cover;">
+            <div style="width: 100%; height: 250px; background: linear-gradient(135deg, #0b6 0%, #08a 100%); display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.2rem; font-weight: 600;">
                 No image
             </div>
         {% endif %}
