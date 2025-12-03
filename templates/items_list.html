@@ -24,7 +24,7 @@
         {% endif %}
     </div>
 
-<!--Shows all the posts currently in the databse-->
+<!--Shows all the posts currently in the database-->
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
 {% for it in items %}
     <article class="card" style="display: flex; flex-direction: column; height: 100%; padding: 0; overflow: hidden; ">
@@ -51,7 +51,7 @@
             <div style="margin-top: auto;">
                 <p style="margin:.25rem 0; color:#777; font-size:.9rem;">
                     {% if it.category %}
-                        <span style="background: #3A7734; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem">#{{ it.category }}</span>
+                        <span style="background: #e7e7ec; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem">#{{ it.category }}</span>
                     {% endif %}
 
                     {% if it.condition %}
