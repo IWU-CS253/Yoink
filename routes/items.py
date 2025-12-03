@@ -13,34 +13,61 @@ def list_items():
     """Lists all the items in the database"""
     db = get_db()
 
-    # otherwise we get all of the currently blocked users, split them into a list
-    # and add the current users id to that list
-    db = get_db()
-    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
+    # redirects the user to the login page if logged out
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
 
-    # if the user doesnt have any users blocked we just
-    # display all the post not including the user's posts
-    if current_blocked_users[0] == None:
+    # otherwise we get all the currently blocked users of the current user
+    # and the list of users who have the currently blocked user, blocked
+    db = get_db()
+    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",
+                                       [session["user_id"]]).fetchone()
+    blocked_by = db.execute("select blocked_by from users where id = ?", [session["user_id"]]).fetchone()
+
+    # if the user doesn't have any users blocked we and the user is not blocked by
+    # anyone then we just display all the post not including the current user's posts.
+    # (this check is to make sure our rows are not empty)
+    if current_blocked_users == None  and blocked_by == None:
         rows = db.execute("SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100", [session["user_id"]])
+        return render_template("items.items_list.html", items=rows)
+
+    # if the current user have any blocked users or is blocked by anyone
+    # we concatenate those two strings
+    if current_blocked_users[0] is not None and blocked_by[0] is not None:
+        user_ids = current_blocked_users[0] +", "+ blocked_by[0]
+
+    # if we get rows, but the rows are empty (empty string), we just
+    # display all items because the user do not have anyone blocked or
+    # is not blocked by any other user.
+    elif current_blocked_users[0] is None and blocked_by[0] is  None:
+        rows = db.execute(
+            "SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100",
+            [session["user_id"]])
         return render_template("items_list.html", items=rows)
 
+    # two edge cases to handle
+    # if one of either string is empty
+    elif current_blocked_users[0] is None and blocked_by[0] is not None:
+        user_ids = blocked_by[0]
+    elif current_blocked_users[0] is not None and blocked_by[0] is  None:
+        user_ids = current_blocked_users[0]
+
     # creating a list of values by splitting the
-    # current blocked user. Then we add the current users
+    # current ids list. Then we add the current users
     # id to the end since that will be used to restrict users
     # from seeing their own items on the list_items page
-    values = current_blocked_users[0].split(", ")
-    values.append(str(session["user_id"]))
+    values = user_ids.split(", ")
+    values.append(session["user_id"])
 
     # creating a placeholder dynamically for all the
     # users that the current user has blocked
-    question_mark_placeholder = placeholder_helper(current_blocked_users[0])
+    question_mark_placeholder = placeholder_helper(user_ids)
 
-    #  creating a query string to keep all data secure and passing
+    # creating a query string to keep all data secure and passing
     # our values into the query
     query = f"SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  not in ({question_mark_placeholder}) and owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100"
     rows = db.execute(query, values).fetchall()
     return render_template("items_list.html", items=rows)
-
 
 @items_bp.get("/items/<int:item_id>")
 @login_required
