@@ -1,0 +1,52 @@
+{% extends "layout.html" %} {% block body %}
+<!--Register Page-->
+<div style="display: flex; gap: 2rem; align-items: center; min-height: 60vh">
+  <div class="card" style="flex: 1; max-width: 500px">
+    <h2 style="margin-top: 0">Create your account</h2>
+    <form method="post" action="{{ url_for('auth.send_otp') }}">
+      <label for="email">School email *</label>
+      <input
+        id="email"
+        name="email"
+        type="email"
+        value="{{email}}"
+        readonly
+        required
+      />
+
+      <input
+        id="username"
+        name="username"
+        type="text"
+        value="{{username}}"
+        style="display: none"
+      />
+
+      <input
+        id="password"
+        name="password"
+        type="password"
+        value="{{password}}"
+        style="display: none"
+      />
+
+      <label for="otp">OTP Code</label>
+      <input id="otp" name="otp" type="password" value="{{otp}}" required />
+
+      <div style="margin-top: 1rem">
+        <button class="btn primary" type="submit">Register</button>
+        <a class="btn" href="{{ url_for('auth.login') }}"
+          >Already have an account?</a
+        >
+      </div>
+    </form>
+  </div>
+  <div
+    style="flex: 1; display: flex; align-items: center; justify-content: center"
+  >
+    <h1 style="font-size: 8rem; font-weight: bold; color: #0b6; margin: 0">
+      YOINK
+    </h1>
+  </div>
+</div>
+{% endblock %}
