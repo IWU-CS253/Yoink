@@ -25,7 +25,7 @@
     </div>
 
 <!--Shows all the posts currently in the database-->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+<div class="items-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
 {% for it in items %}
     <article class="card" style="display: flex; flex-direction: column; height: 100%; padding: 0; overflow: hidden; ">
 
@@ -76,10 +76,43 @@
     </div>
   {% endfor %}
 </div>
+    <!-- Responsive styles for smaller screens -->
     <style>
+    /* tablet and smaller screens */
+    /* !important overrides the inline css */
     @media (max-width: 768px) {
-        div[style="grid-template-columns"] {
-            grid-template-columns: 1fr;
+        .items-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* Mobile phones */
+    @media (max-width: 480px) {
+        .items-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        /* manage the header items vertically */
+        .card {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 1rem !important;
+        }
+
+        /* make search input full width */
+        .card input[type="text"] {
+            width: 100% !important;
+        }
+
+        .card form {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+        }
+
+        .card form button {
+            width: 100% !important;
         }
     }
     </style>
