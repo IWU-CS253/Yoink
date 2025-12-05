@@ -4,7 +4,7 @@
   <div style="display: flex; gap: 2rem; align-items: center; min-height: 60vh;">
     <div class="card" style="flex: 1; max-width: 500px;">
       <h2 style="margin-top:0;">Log in</h2>
-      <form method="post" action="{{ url_for('login', next=request.args.get('next')) }}">
+      <form method="post" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
         <!--Asks for username and password-->
         <label for="username">Username *</label>
         <input id="username" name="username" type="text" required>
@@ -15,7 +15,7 @@
         <!--Gives the option to log in and account-->
         <div style="margin-top:1rem;">
           <button class="btn primary" type="submit">Log in</button>
-          <a class="btn" href="{{ url_for('register') }}">Create an account</a>
+          <a class="btn" href="{{ url_for('auth.register') }}">Create an account</a>
         </div>
       </form>
     </div>
