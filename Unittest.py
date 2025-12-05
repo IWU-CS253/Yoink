@@ -77,9 +77,17 @@ class FlaskrTestCase(unittest.TestCase):
     def search(self, title):
         return self.app.post('/search', data=dict(title=title), follow_redirects=True)
 
+    # codehelp, helped me with the logic behind the data
     def block_user(self):
-        return self.app.get('/blocked_users?username=admin2', follow_redirects=True)
-
+        return self.app.get('/blocked_users?blocked_user=admin2', follow_redirects=True)
+    
+    def unblock_user(self):
+        with flaskr.app.app_context():
+            db = flaskr.get_db()
+            user = db.execute("SELECT id FROM users WHERE username = ?", ('admin2',)).fetchone()
+            user_id = user['id']
+        return self.app.get('/unblock_user', query_string={'unblock-form': str(user_id)}, follow_redirects=True)
+    
     def logout(self):
         return self.app.post('/logout', follow_redirects=True)
 
@@ -136,22 +144,42 @@ class FlaskrTestCase(unittest.TestCase):
         assert b"desk" in rv.data
         assert b"lamp" not in rv.data
 
-    # def test_block_user(self):
-    #     self.complete_registration('admin', 'admin@iwu.edu', 'default')
-    #     self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
+    def test_block_user(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
 
-    #     self.login('admin2', 'default')
-    #     self.create_item('desk', 'a nick desk', 'Other',
-    #                      'Good', 'Magil', '123@iwu.edu', None)
-    #     self.logout()
+        self.login('admin2', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        self.logout()
 
-    #     self.login('admin', 'default')
+        self.login('admin', 'default')
 
-    #     rb = self.block_user()
-    #     assert b'admin2 is now blocked!' in rb.data
+        self.block_user()
 
-    #     rv = self.search('desk')
-    #     assert b'desk' not in rv.data
+        rv = self.search('desk')
+        assert b'desk' not in rv.data
+    
+    def test_unblock_user(self):
+        self.complete_registration('admin', 'admin@iwu.edu', 'default')
+        self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
+
+        self.login('admin2', 'default')
+        self.create_item('desk', 'a nick desk', 'Other',
+                         'Good', 'Magil', '123@iwu.edu', None)
+        self.logout()
+
+        self.login('admin', 'default')
+
+        self.block_user()
+
+        rv = self.search('desk')
+        assert b'desk' not in rv.data
+
+        self.unblock_user()
+    
+        rb = self.search('desk')
+        assert b'desk' in rb.data
 
 if __name__ == '__main__':
     unittest.main()
