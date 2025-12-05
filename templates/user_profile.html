@@ -24,7 +24,7 @@
 <div class="container">
    <img class="user_photo" src="https://picsum.photos/200/300">
    <h5 class="card-title">     @{{ user_name }}</h5>
-   <form action="{{ url_for('users.blocked_users') }}"> <button onclick="confirmDelete()" id="blocked_user_form" name="blocked_user" class="btn btn-danger" value="{{ user_name }}">Block @{{ user_name }}</button> </form>
+   <form action="{{ url_for('users.blocked_users') }}"> <button onclick="confirmDelete()" id="blocked_user_form" name="blocked_user" class="btn btn-danger" style="cursor: pointer;" value="{{ user_name }}">Block @{{ user_name }}</button> </form>
 </div>
 {% for it in items %}
 <ol>
