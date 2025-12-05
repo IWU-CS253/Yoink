@@ -84,6 +84,7 @@ def blocked_users():
         db.commit()
         flash(f"{blocked_user} is now blocked!", "danger")
         return redirect(url_for('items.list_items'))
+    return redirect(url_for('items.list_items'))
 
 @users_bp.route("/blocked_users_list")
 @login_required
@@ -143,20 +144,10 @@ def unblock_user():
     db.execute("Update users set blocked_by = ? where id = ?", [placeholder2, unblocked_user])
     db.commit()
 
-    # return them to the same page which is the list
+    # return them to the same page which is the list 
     # of users that are currently blocked.
     username=session["username"]
     flash(f"{username} is now unblocked. You can now see their post.", "success")
     return (redirect(url_for('users.blocked_users_list')))
 
-def placeholder_helper(ls):
-    """Helper function for creating placeholders if needed."""
 
-    # creating a placeholder dynamically for all the
-    # users that the current user has blocked
-    question_mark_placeholder = ""
-    for i in range(len(ls.split(", "))):
-        question_mark_placeholder = question_mark_placeholder + "?"
-        question_mark_placeholder = question_mark_placeholder + ", "
-    question_mark_placeholder = question_mark_placeholder[:-2]
-    return question_mark_placeholder

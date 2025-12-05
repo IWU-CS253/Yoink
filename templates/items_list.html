@@ -43,7 +43,7 @@
 
         <div style="padding: 1rem; flex:1; display: flex; flex-direction: column;">
             <h3 style="margin:0 0 0.5rem 0;">
-                <a href="{{ url_for('item_detail', item_id=it.id) }}">{{ it.title[:50] }}{% if it.title|length > 50 %}…{% endif %}</a>
+                <a href="{{ url_for('items.item_detail', item_id=it.id) }}">{{ it.title[:50] }}{% if it.title|length > 50 %}…{% endif %}</a>
             </h3>
 
             <p style="margin:0 0 0.5rem 0; color:#555; flex: 1">
