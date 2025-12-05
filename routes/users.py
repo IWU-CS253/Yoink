@@ -151,15 +151,3 @@ def unblock_user():
     username= db.execute("Select username from users where id =?", [unblocked_user]).fetchone()[0]
     flash(f"{username} is now unblocked. You can now see their post.", "success")
     return (redirect(url_for('users.blocked_users_list')))
-
-def placeholder_helper(ls):
-    """Helper function for creating placeholders if needed."""
-
-    # creating a placeholder dynamically for all elt.
-    # in the given list
-    question_mark_placeholder = ""
-    for i in range(len(ls.split(", "))):
-        question_mark_placeholder = question_mark_placeholder + "?"
-        question_mark_placeholder = question_mark_placeholder + ", "
-    question_mark_placeholder = question_mark_placeholder[:-2]
-    return question_mark_placeholder

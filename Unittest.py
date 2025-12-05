@@ -161,23 +161,27 @@ class FlaskrTestCase(unittest.TestCase):
         assert b'desk' not in rv.data
     
     def test_unblock_user(self):
+
+        # create two accounts, login as second user, and
+        # create an item, then logout
         self.complete_registration('admin', 'admin@iwu.edu', 'default')
         self.complete_registration('admin2', 'admin2@iwu.edu', 'default')
-
         self.login('admin2', 'default')
         self.create_item('desk', 'a nick desk', 'Other',
                          'Good', 'Magil', '123@iwu.edu', None)
         self.logout()
 
+        # log in as the first user and block the second user
         self.login('admin', 'default')
-
         self.block_user()
 
+        # the item should not be visible
         rv = self.search('desk')
         assert b'desk' not in rv.data
 
+        # unlock the second user and the item
+        # should now be visible
         self.unblock_user()
-    
         rb = self.search('desk')
         assert b'desk' in rb.data
 
