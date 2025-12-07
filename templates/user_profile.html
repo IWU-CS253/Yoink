@@ -13,6 +13,9 @@
    color: white;
    border-color: white;
    }
+   .user_photo {
+        height: 145px;
+   }
 </style>
     <script>
 
@@ -22,7 +25,7 @@
     }
     </script>
 <div class="container">
-   <img class="user_photo" src="https://picsum.photos/200/300">
+   <img class="user_photo" alt="Yoink - Student Supply Exchange" src="{{ url_for('static', filename='icon.png') }}">
    <h5 class="card-title">     @{{ user_name }}</h5>
    <form action="{{ url_for('users.blocked_users') }}"> <button onclick="confirmDelete()" id="blocked_user_form" name="blocked_user" class="btn btn-danger" style="cursor: pointer;" value="{{ user_name }}">Block @{{ user_name }}</button> </form>
 </div>

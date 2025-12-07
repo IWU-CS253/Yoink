@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from sqlalchemy.dialects.sqlite.base import SQLiteExecutionContext
+
 from utils import get_db, login_required, placeholder_helper
 
 users_bp = Blueprint('users', __name__)
@@ -144,9 +146,10 @@ def unblock_user():
     db.execute("Update users set blocked_by = ? where id = ?", [placeholder2, unblocked_user])
     db.commit()
 
-    # return them to the same page which is the list 
-    # of users that are currently blocked.
-    username=session["username"]
+    # return the current user to the same page which is the list
+    # of the remaining users that are blocked. The user also see
+    # a success flash indicating the user that was unblocked
+    username= db.execute("Select username from users where id =?", [unblocked_user]).fetchone()[0]
     flash(f"{username} is now unblocked. You can now see their post.", "success")
     return (redirect(url_for('users.blocked_users_list')))
 
