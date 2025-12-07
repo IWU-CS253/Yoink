@@ -25,8 +25,8 @@
         {% endif %}
     </div>
 
-<!--Shows all the posts currently in the databse-->
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+<!--Shows all the posts currently in the database-->
+<div class="items-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
 {% for it in items %}
     <article class="card" style="display: flex; flex-direction: column; height: 100%; padding: 0; overflow: hidden; ">
 
@@ -43,7 +43,7 @@
 
         <div style="padding: 1rem; flex:1; display: flex; flex-direction: column;">
             <h3 style="margin:0 0 0.5rem 0;">
-                <a href="{{ url_for('items.item_detail', item_id=it.id) }}">{{ it.title }}</a>
+                <a href="{{ url_for('items.item_detail', item_id=it.id) }}">{{ it.title[:50] }}{% if it.title|length > 50 %}…{% endif %}</a>
             </h3>
 
             <p style="margin:0 0 0.5rem 0; color:#555; flex: 1">
@@ -52,7 +52,7 @@
             <div style="margin-top: auto;">
                 <p style="margin:.25rem 0; color:#777; font-size:.9rem;">
                     {% if it.category %}
-                        <span style="background: #3A7734; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem">#{{ it.category }}</span>
+                        <span style="background: #e7e7ec; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem">#{{ it.category }}</span>
                     {% endif %}
 
                     {% if it.condition %}
@@ -64,7 +64,7 @@
                     Posted by
                     <form method="post" action="{{ url_for('users.user_profile') }}" style="display: inline;">
                         <input type="hidden" name="profile_username" value="{{ it.username }}">
-                        <button style="background: none; border: none; padding: 0; color: #00bb66" type="submit">{{ it.username }}</button>
+                        <button style="background: none; border: none; padding: 0; color: #00bb66; cursor: pointer; text-decoration: underline;" type="submit">{{ it.username }}</button>
                     </form>
                     · {{ it.created_at }}
                 </p>
@@ -77,10 +77,43 @@
     </div>
   {% endfor %}
 </div>
+    <!-- Responsive styles for smaller screens -->
     <style>
+    /* tablet and smaller screens */
+    /* !important overrides the inline css */
     @media (max-width: 768px) {
-        div[style="grid-template-columns"] {
-            grid-template-columns: 1fr;
+        .items-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* Mobile phones */
+    @media (max-width: 480px) {
+        .items-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        /* manage the header items vertically */
+        .card {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 1rem !important;
+        }
+
+        /* make search input full width */
+        .card input[type="text"] {
+            width: 100% !important;
+        }
+
+        .card form {
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
+        }
+
+        .card form button {
+            width: 100% !important;
         }
     }
     </style>

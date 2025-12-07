@@ -86,6 +86,7 @@ def blocked_users():
         db.commit()
         flash(f"{blocked_user} is now blocked!", "danger")
         return redirect(url_for('items.list_items'))
+    return redirect(url_for('items.list_items'))
 
 @users_bp.route("/blocked_users_list")
 @login_required

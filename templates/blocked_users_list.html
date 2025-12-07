@@ -29,7 +29,7 @@
     <article class="card">
     <img class="user_photo" src="{{ url_for('static', filename='icon.png') }}">
         <a>{{ user.username }} </a>
-        <form method="get"  action="{{ url_for('users.unblock_user') }}"><button name="unblock-form" value="{{ user.id }}" class="btn" type="submit" >Unblock</button></form>
+        <form method="get"  action="{{ url_for('users.unblock_user') }}"><button name="unblock-form" value="{{ user.id }}" style="cursor: pointer;" class="btn" type="submit" >Unblock</button></form>
     </article>
     {% endfor %}
         </div>
