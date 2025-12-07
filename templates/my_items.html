@@ -1,5 +1,54 @@
 {% extends "layout.html" %} Your items {% block body %}
 <!--The user item page-->
+<style>
+  /* Responsive styles for different screen sizes */
+  @media (max-width: 768px) {
+    article.card {
+      flex-direction: column !important;
+    }
+
+    article.card img, article.card > div:first-of-type {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    article.card image {
+      height: auto !important;
+      max-height: 200px !important;
+    }
+
+    .item-buttons a, .item-buttons button {
+      width: 100%;
+    }
+  }
+
+  /* Responsive page for mobile like small screen */
+  @media (max-width: 480px) {
+    article.card {
+      padding: 0.75rem !important;
+      gap: 0.75rem !important;
+    }
+
+    h3 {
+      font-size: 1.1rem !important;
+    }
+
+    p {
+      font-size: 0.85rem !important;
+    }
+
+    .item-buttons a, .item-buttons button {
+      padding: 0.5rem !important;
+      font-size: 0.85rem !important;
+    }
+
+    .item-buttons svg {
+      width: 16px !important;
+      height: 16px !important;
+    }
+  }
+</style>
+
 <ol>
   {% for it in items %}
   <article class="card" style="display: flex; gap: 1rem; align-items: flex-start;">
@@ -53,7 +102,7 @@
       </div>
 
       <!-- Buttons on the right side -->
-      <div style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
+      <div class="item-buttons" style="display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;">
         <!-- Edit button -->
         <a href="{{ url_for('items.edit_item', item_id=it.id) }}" style="display: flex; flex-direction: row; align-items: center;
                     column-gap: 10px; border: 1px solid grey; padding: 10px; border-radius: 4px; color: black; text-decoration: none; background: #e7e7ec;">
