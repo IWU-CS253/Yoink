@@ -1,6 +1,53 @@
 {% extends "layout.html" %} {% block body %}
-<!--Register Page-->
-<div style="display: flex; gap: 2rem; align-items: center; min-height: 60vh">
+<!--OTP Register Page-->
+<style>
+  /* Responsive styles for smaller screens */
+  @media (max-width: 768px) {
+    .otp-container {
+      margin-top: 5rem !important;
+      flex-direction: column !important;
+      gap: 1.5rem !important;
+      min-height: auto !important;
+    }
+
+    .card {
+      max-width: 100% !important;
+    }
+
+    .yoink-logo h1 {
+      font-weight: 4rem !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .otp-container {
+      gap: 1rem !important;
+    }
+
+    .card {
+      padding: 1rem !important;
+    }
+
+    h2 {
+      font-size: 1.5rem !important;
+    }
+
+    .yoink-logo h1 {
+      font-size: 3rem !important;
+    }
+
+    input {
+      font-size: 16px !important;
+    }
+
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+
+<div class="otp-container" style="display: flex; gap: 2rem; align-items: center; min-height: 60vh">
   <div class="card" style="flex: 1; max-width: 500px">
     <h2 style="margin-top: 0">Create your account</h2>
     <form method="post" action="{{ url_for('auth.send_otp') }}">
@@ -41,7 +88,7 @@
       </div>
     </form>
   </div>
-  <div
+  <div class="yoink-logo"
     style="flex: 1; display: flex; align-items: center; justify-content: center"
   >
     <h1 style="font-size: 8rem; font-weight: bold; color: #0b6; margin: 0">
