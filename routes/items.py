@@ -24,6 +24,7 @@ def list_items():
                                        [session["user_id"]]).fetchone()
     blocked_by = db.execute("select blocked_by from users where id = ?", [session["user_id"]]).fetchone()
 
+    user_ids = ""
     # if the user doesn't have any users blocked we and the user is not blocked by
     # anyone then we just display all the post not including the current user's posts.
     # (this check is to make sure our rows are not empty)
@@ -82,8 +83,8 @@ def item_detail(item_id: int):
     """, (item_id,)).fetchone()
     if not row:
         flash("Item not found.", "warning")
-        return redirect(url_for("items.list_items"))
-    return render_template("item_detail.html", item=row)
+        return redirect(url_for("list_items"))
+    return render_template("items.item_detail.html", item=row)
 
 
 @items_bp.route("/items/new", methods=["GET", "POST"])

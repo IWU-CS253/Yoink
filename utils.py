@@ -136,6 +136,9 @@ def save_image(file_storage, upload_folder: str, allowed_extensions: set):
 
 def placeholder_helper(ls):
     """Helper function for creating placeholders if needed."""
+
+    # creating a placeholder dynamically for all the
+    # users that the current user has blocked
     question_mark_placeholder = ""
     for i in range(len(ls.split(", "))):
         question_mark_placeholder = question_mark_placeholder + "?"
