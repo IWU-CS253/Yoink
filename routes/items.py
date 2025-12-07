@@ -13,34 +13,62 @@ def list_items():
     """Lists all the items in the database"""
     db = get_db()
 
-    # otherwise we get all of the currently blocked users, split them into a list
-    # and add the current users id to that list
-    db = get_db()
-    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?", [session["user_id"]]).fetchone()
+    # redirects the user to the login page if logged out
+    if "user_id" not in session:
+        return redirect(url_for("auth.login"))
 
-    # if the user doesnt have any users blocked we just
-    # display all the post not including the user's posts
-    if current_blocked_users[0] == None:
+    # otherwise we get all the currently blocked users of the current user
+    # and the list of users who have the currently blocked user, blocked
+    db = get_db()
+    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",
+                                       [session["user_id"]]).fetchone()
+    blocked_by = db.execute("select blocked_by from users where id = ?", [session["user_id"]]).fetchone()
+
+    user_ids = ""
+    # if the user doesn't have any users blocked we and the user is not blocked by
+    # anyone then we just display all the post not including the current user's posts.
+    # (this check is to make sure our rows are not empty)
+    if current_blocked_users == None  and blocked_by == None:
         rows = db.execute("SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100", [session["user_id"]])
+        return render_template("items.items_list.html", items=rows)
+
+    # if the current user have any blocked users or is blocked by anyone
+    # we concatenate those two strings
+    if current_blocked_users[0] is not None and blocked_by[0] is not None:
+        user_ids = current_blocked_users[0] +", "+ blocked_by[0]
+
+    # if we get rows, but the rows are empty (empty string), we just
+    # display all items because the user do not have anyone blocked or
+    # is not blocked by any other user.
+    elif current_blocked_users[0] is None and blocked_by[0] is  None:
+        rows = db.execute(
+            "SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100",
+            [session["user_id"]])
         return render_template("items_list.html", items=rows)
 
+    # two edge cases to handle
+    # if one of either string is empty
+    elif current_blocked_users[0] is None and blocked_by[0] is not None:
+        user_ids = blocked_by[0]
+    elif current_blocked_users[0] is not None and blocked_by[0] is  None:
+        user_ids = current_blocked_users[0]
+
     # creating a list of values by splitting the
-    # current blocked user. Then we add the current users
+    # current ids list. Then we add the current users
     # id to the end since that will be used to restrict users
     # from seeing their own items on the list_items page
-    values = current_blocked_users[0].split(", ")
-    values.append(str(session["user_id"]))
+    values = user_ids.split(", ")
+    values.append(session["user_id"])
 
     # creating a placeholder dynamically for all the
     # users that the current user has blocked
-    question_mark_placeholder = placeholder_helper(current_blocked_users[0])
+    question_mark_placeholder = placeholder_helper(user_ids)
 
-    #  creating a query string to keep all data secure and passing
+    # creating a query string to keep all data secure and passing
     # our values into the query
     query = f"SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  not in ({question_mark_placeholder}) and owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100"
     rows = db.execute(query, values).fetchall()
     return render_template("items_list.html", items=rows)
-
 
 @items_bp.get("/items/<int:item_id>")
 @login_required
@@ -55,13 +83,13 @@ def item_detail(item_id: int):
     """, (item_id,)).fetchone()
     if not row:
         flash("Item not found.", "warning")
-        return redirect(url_for("items.list_items"))
-    return render_template("item_detail.html", item=row)
+        return redirect(url_for("list_items"))
+    return render_template("items.item_detail.html", item=row)
 
 
 @items_bp.route("/items/new", methods=["GET", "POST"])
-@rate_limit_by_user(30, 60 * 60 * 24)
 @login_required
+@rate_limit_by_user(30, 60 * 60 * 24)
 def create_item():
     """Adds a post to the website"""
 
@@ -113,8 +141,8 @@ def create_item():
 
 
 @items_bp.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
-@rate_limit_by_user(3, 60)
 @login_required
+@rate_limit_by_user(3, 60)
 @owns_resource
 def edit_item(item_id: int):
     """Allows the user to only edit in their own posts"""
@@ -197,13 +225,39 @@ def search():
     """Searches for specific items"""
     db = get_db()
     search_term = f"%{request.form['title']}%"
-    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",[session["user_id"]]).fetchone()
+    current_blocked_users = db.execute("select blocked_user_ids from users where id = ?",
+                                       [session["user_id"]]).fetchone()
+    if current_blocked_users[0] is not None and current_blocked_users is not None:
+        current_blocked_users = current_blocked_users[0].strip().split(',')
+    else:
+        current_blocked_users = []
+
+    question_mark_holder = ''
+
+    for i in current_blocked_users:
+        if current_blocked_users:
+            question_mark_holder += '?,'
+        else:
+            question_mark_holder = '?,'
 
     # base case: where the user wants to go back to every post
     if request.form['title'] == '':
-        sorted_items = db.execute(f'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id Where owner_id not in () ORDER BY created_at DESC')
+        if not current_blocked_users:
+            sorted_items = db.execute(
+                'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id ORDER BY created_at DESC').fetchall()
+        else:
+            sorted_items = db.execute(
+                f'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id Where owner_id not in ({question_mark_holder[:-1]}) ORDER BY created_at DESC',
+                current_blocked_users)
     else:
         # if not empty, it will show the item based on the characters they use for the search
-        sorted_items = db.execute('SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY items.created_at DESC', [search_term]).fetchall()
+        if not current_blocked_users:
+            sorted_items = db.execute(
+                'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) ORDER BY items.created_at DESC',
+                [search_term]).fetchall()
+        else:
+            sorted_items = db.execute(
+                f'SELECT * FROM items INNER JOIN users ON items.owner_id = users.id WHERE LOWER(items.title) LIKE LOWER(?) and owner_id not in ({question_mark_holder[:-1]}) ORDER BY items.created_at DESC',
+                [search_term] + current_blocked_users).fetchall()
 
     return render_template("items_list.html", items=sorted_items)
