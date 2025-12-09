@@ -29,8 +29,8 @@ def list_items():
     # anyone then we just display all the post not including the current user's posts.
     # (this check is to make sure our rows are not empty)
     if current_blocked_users == None  and blocked_by == None:
-        rows = db.execute("SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100", [session["user_id"]]).fetchall()
-        return render_template("items_list.html", items=rows)
+        rows = db.execute("SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100", [session["user_id"]])
+        return render_template("items.items_list.html", items=rows)
 
     # if the current user have any blocked users or is blocked by anyone
     # we concatenate those two strings
@@ -43,7 +43,7 @@ def list_items():
     elif current_blocked_users[0] is None and blocked_by[0] is  None:
         rows = db.execute(
             "SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100",
-            [session["user_id"]]).fetchall()
+            [session["user_id"]])
         return render_template("items_list.html", items=rows)
 
     # two edge cases to handle
@@ -84,7 +84,7 @@ def item_detail(item_id: int):
     if not row:
         flash("Item not found.", "warning")
         return redirect(url_for("list_items"))
-    return render_template("item_detail.html", item=row)
+    return render_template("items.item_detail.html", item=row)
 
 
 @items_bp.route("/items/new", methods=["GET", "POST"])
