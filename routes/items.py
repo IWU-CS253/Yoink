@@ -30,7 +30,7 @@ def list_items():
     # (this check is to make sure our rows are not empty)
     if current_blocked_users == None  and blocked_by == None:
         rows = db.execute("SELECT items.*, users.username FROM items JOIN users ON users.id = items.owner_id WHERE owner_id  != ? ORDER BY created_at DESC, id DESC LIMIT 100", [session["user_id"]])
-        return render_template("items.items_list.html", items=rows)
+        return render_template("items_list.html", items=rows)
 
     # if the current user have any blocked users or is blocked by anyone
     # we concatenate those two strings
