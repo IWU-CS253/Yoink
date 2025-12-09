@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import random
+import string
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from utils import get_db, rate_limit_by_identifier, yag, BASE_DIR
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -71,7 +72,8 @@ def register():
             flash("Username, email, and password are required.", "danger")
             return render_template("register.html")
 
-        otp_code = random.randint(1000, 9999)
+        # Source - https://stackoverflow.com/a/2257449
+        otp_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
 
         db = get_db()
 
